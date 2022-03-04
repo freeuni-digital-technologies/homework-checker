@@ -1,0 +1,39 @@
+{
+  "name": "main-module",
+  "version": "1.0.0",
+  "description": "main module for digital technologies subject",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "start": "NODE_ENV=production node --trace-uncaught lib/index.js",
+    "notify": "NODE_ENV=production node lib/notifications.js",
+    "test": "ts-mocha test/**/*.test.ts",
+    "daemon": "node lib/daemon.js"
+  },
+  "dependencies": {
+    "argparse": "^1.0.10",
+    "classroom-api": "^1.0.2",
+    "codehskarel-tester": "^1.0.0",
+    "cron": "^1.8.2",
+    "fs-extra": "^10.0.0",
+    "mock": "^0.1.1",
+    "node-html-parser": "^5.2.0",
+    "shelljs": "^0.8.4",
+    "ts-mockito": "^2.6.1",
+    "unzipper": "^0.10.11",
+    "website-tester": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/argparse": "^1.0.38",
+    "@types/chai": "^4.2.11",
+    "@types/cron": "^1.7.2",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.9.8",
+    "@types/shelljs": "^0.8.8",
+    "chai": "^4.2.0",
+    "mocha": "^7.0.0",
+    "ts-mocha": "^7.0.0",
+    "typescript": "^3.8.3"
+  }
+}

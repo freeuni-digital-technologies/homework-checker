@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs, {existsSync} from 'fs'
 import {Submission} from 'dt-types'
 import {Partitions} from './partitions'
 import {HwConfig} from './homework'
@@ -99,6 +99,9 @@ export class Run {
     }
 
     private getPreviousRunInfo(): Partitions<Submission[]> {
+        if (!existsSync(config.STUDENTS_DATA_PATH)) {
+            fs.writeFileSync(config.STUDENTS_DATA_PATH, JSON.stringify([]), 'utf-8')
+        }
         const students = new StudentList(config.STUDENTS_DATA_PATH)
         const output: any = {}
         if (!this.lastRun) {

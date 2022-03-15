@@ -154,7 +154,7 @@ function getConfigsOfCurrentHomeworks(): HwConfig[] {
 export function getCurrentHWs() {
     var now = new Date()
     var aWeekAfterNow = new Date()
-    aWeekAfterNow.setDate(aWeekAfterNow.getDate()+10)
+    aWeekAfterNow.setDate(aWeekAfterNow.getDate()+11)
 
     const homeworks = getConfigsOfCurrentHomeworks();
     return homeworks.map(hw => {

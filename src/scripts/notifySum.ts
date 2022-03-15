@@ -4,7 +4,7 @@ import {summaries} from "../templates";
 import { ArgumentParser } from 'argparse'
 import fs from "fs";
 import path from "path";
-import {data_path} from "../runs";
+import {data_path} from "../config";
 
 
 function notifyEmails() {

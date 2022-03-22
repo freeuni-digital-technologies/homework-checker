@@ -1,14 +1,20 @@
+import {
+    filterSubmissions,
+    getSubmissionsWithResults,
+    processSubmissions,
+    setSubmissionModule,
+    sliceSubmissions
+} from "../src/homeworkChecker";
 
-import { filterSubmissions, processSubmissions, getSubmissionsWithResults, sliceSubmissions, setSubmissionModule } from "../src/homeworkChecker";
+import {expect} from "chai";
+import {Run} from "../src/runs";
 
-import { Assertion, expect } from "chai";
-import { Run } from "../src/runs";
-
-import { mock, anything, when, deepEqual, instance } from "ts-mockito";
-import { HwConfig } from "../src/homework";
+import {anything, instance, mock, when} from "ts-mockito";
+import {HwConfig} from "../src/homework";
 import {Result, Submission} from "dt-types";
-import * as path from "path"; // ??
-
+import * as path from "path";
+import {main} from "../src";
+import {RunOpts} from "../src/runs"; // ??
 
 
 const hw: HwConfig = {
@@ -292,8 +298,32 @@ describe("Integration Tests",() => {
 
     })
 
-    
 
+    it.skip('run hw4 test with using main test',  () => {
+        const fakeConfigHw4: HwConfig = {
+            id: 'hw4',
+            name: 'დავალება 4',
+            module: 'karel',
+            deadline: '2021-10-28',
+            configPath: '../dt-homeworks/hw4/config.js',
+            testFileName: 'hw4tester.js',
+            emailTemplates: {}
+        };
+        const fakeRunOpts: RunOpts = {
+                trial: false,
+                restart: false,
+                rerun: false,
+                continue: null,
+                omit:  [''],
+                slice: 10,
+                download: false
+        };
+        return main(fakeConfigHw4, fakeRunOpts)
+            .then(output => {
+                console.log(output)
+            })
+            .catch((ex) => console.log(ex));
+    })
 })
 
 

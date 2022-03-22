@@ -31,39 +31,14 @@ export interface HwConfig {
     emailTemplates?: Partitions<EmailTemplate>
 }
 
-/* Homework Configuration Property Interface */
-type HwConfigProperty = {
-    name: string,
-    type: string
+class HwConfigProp {
+    public id: string = "";
+    public classroomName: string = "";
+    public deadline: string = "";
+    public testFileName: string = "";
+    public emailTemplates?: object;
+    public module: string = "";
 }
-
-const properHwConfigProperties: HwConfigProperty[] = [
-    {
-        name: "id",
-        type: "string"
-    },
-    {
-        name: "classroomName",
-        type: "string"
-    },
-    {
-        name: "deadline",
-        type: "string"
-    },
-    {
-        name: "testFileName",
-        type: "string"
-    },
-    {
-        name: "emailTemplates",
-        type: "object"
-    },
-    {
-        name: "module",
-        type: "string"
-    }
-];
-
 
 /* Message Constructors for not existence properties and invalid properties */
 
@@ -75,35 +50,37 @@ function printPropertyIllegalTypeMessage(propertyName: string, propertyType: str
 }
 
 /* Checks if given configuration of homework is valid */
-
-function checkGivenHwConfigroperties(preHwConfig: any){
+//TODO[LA] fix optional arguments are not optional in config file
+function checkGivenHwConfigProps(preHwConfig: any) {
     if(!preHwConfig){
         console.log("Could not find config object in configuration file");
         process.exit(-1);
     }
 
-    properHwConfigProperties.forEach(currentConfigProperties => {
-        let {name , type} = currentConfigProperties;
+    const tempConfProp: HwConfigProp = new HwConfigProp();
+    for(const i of Object.getOwnPropertyNames(tempConfProp)) {
+        let desc: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(tempConfProp, i);
 
-        if(!preHwConfig.hasOwnProperty(name)){
-            printPropertyDoesNotExistMessage(type);
+        if(!preHwConfig.hasOwnProperty(i) && typeof desc?.value !== undefined){
+            printPropertyDoesNotExistMessage(i);
             process.exit(-1);
         }
-        if(typeof preHwConfig[name] != type){
-            printPropertyIllegalTypeMessage(name,type);
+
+        if(typeof desc?.value !== typeof preHwConfig[i]) {
+            printPropertyIllegalTypeMessage(i, typeof desc?.value);
             process.exit(-1);
         }
-    })
+    }
 }
 
 /* Convert given configuration file to local interface (Locally interface will be deleted soon) */
 
 function convertGivenHwConfigToInterface(preHwConfig: any, path: string){
-    const rvConfig: HwConfig = { 
-        id: preHwConfig.id, 
-        name: preHwConfig.classroomName, 
+    const rvConfig: HwConfig = {
+        id: preHwConfig.id,
+        name: preHwConfig.classroomName,
         module: preHwConfig.module,
-        deadline: preHwConfig.deadline, 
+        deadline: preHwConfig.deadline,
         configPath: path,
         testFileName: preHwConfig.testFileName,
         emailTemplates: preHwConfig.emailTemplates
@@ -112,8 +89,8 @@ function convertGivenHwConfigToInterface(preHwConfig: any, path: string){
 }
 
 export function readHomeworkConfiguration(configPath: string): HwConfig {
-    const absolutePath = path.resolve(__dirname, configPath)
-    let configFile = null
+    const absolutePath = path.resolve(__dirname, configPath);
+    let configFile = null;
     try {
         configFile = require(absolutePath);
     } catch(e) {
@@ -121,7 +98,7 @@ export function readHomeworkConfiguration(configPath: string): HwConfig {
         process.exit(-1);
     }
     const preHwConfig = configFile;
-    checkGivenHwConfigroperties(preHwConfig);
+    checkGivenHwConfigProps(preHwConfig);
 
     return convertGivenHwConfigToInterface(preHwConfig, absolutePath);
 }
@@ -137,9 +114,9 @@ export function readHomeworkConfiguration(configPath: string): HwConfig {
 */
 function getConfigsOfCurrentHomeworks(): HwConfig[] {
     let homeworks: HwConfig[] = [];
-    
+
     fs.readdirSync( path.resolve(__dirname, DEFAULT_HW_CONFIG_PATH) ).forEach(subfolder => {
-        
+
         if(subfolder == "README.md" || subfolder == ".git")
             return;
 

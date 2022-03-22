@@ -1,5 +1,5 @@
 import {Submission} from "dt-types";
-import {Drive} from 'classroom-api'
+import {Drive, downloadError} from 'classroom-api'
 import {log, Run} from "./runs";
 
 import path from 'path'
@@ -77,7 +77,7 @@ async function downloadAndTest(submission: Submission, drive: Drive, index: numb
 */
 function logError(submission: Submission, error: any) {
     // LATER ცალკე კლასი იქნება ერორების და იმის მიხედვით
-    const knownErrors = [zipFormatError, fileNotFoundError, filesNotFoundError, teamNameNotFoundError]
+    const knownErrors = [zipFormatError, downloadError, fileNotFoundError, filesNotFoundError, teamNameNotFoundError]
     if (knownErrors.includes(error)) {
         submission.incorrectFormat = true
         submission.results.push({

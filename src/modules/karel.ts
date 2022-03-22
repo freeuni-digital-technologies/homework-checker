@@ -13,18 +13,18 @@ function downloadAtInterval(submission: Submission, drive: Drive,  index: number
     const fileName = attachment.title
     const id = attachment.id
     const path = `${run.moveDir}/${fileName}`
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         setTimeout(() => {
             if (run.opts.download) {
                 if (process.env.NODE_ENV === 'production')
                     console.log(`${submission.emailId}: downloading`)
                 saveFile(drive, id, path)
                     .then(() => resolve(path))
+                    .catch((err: any) => reject(err))
             } else {
                 resolve(path)
             }
         }, (index) * 200)
-
     })
 }
 

@@ -26,6 +26,7 @@ export function getArgs(hwName?: string): EnvOptions {
     parser.addArgument(['-k', '--skip'], {help: 'skip check of id'})
     parser.addArgument(['-l', '--late'], {help: 'ignore late of id'})
     parser.addArgument(['-p', '--config-path'], {help: 'location of homework config'})
+    parser.addArgument(['-dr','--data-dir'], {help: "location of data folder"})
     const args = parser.parseArgs()
     const hwId: string = hwName || args['hw']
 
@@ -42,6 +43,15 @@ export function getArgs(hwName?: string): EnvOptions {
     configPath = path.resolve(__dirname, configPath)
 
     const hwConfig = readHomeworkConfiguration(configPath);
+
+    /* Data Folder Path */
+    const dataPath: string = args['data_dir']
+    if(!dataPath){
+        hwConfig.dataDir = path.resolve(__dirname, `../../../data`)
+    }else{
+        hwConfig.dataDir = path.resolve(__dirname, dataPath)
+    }
+
 
     if (!hwConfig) {
         console.log('provide valid submission id')

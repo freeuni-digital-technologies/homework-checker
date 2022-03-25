@@ -43,6 +43,7 @@ export function defaultConfig(): HwConfig  {
         module: '',
         deadline: '',
         testFileName: '',
+        dataDir: '',
         configPath: ''
     }
 }

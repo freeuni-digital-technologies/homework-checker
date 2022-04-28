@@ -24,12 +24,10 @@ export async function getSubmissionsWithResults(configSubject: string, hw: HwCon
     const testPath = path.resolve(path.dirname(hw.configPath), hw.testFileName)
     if(!fs.existsSync(testPath)){
         throw new Error("Invalid Test Path")
-        process.exit(1)
     }
 
     if(!fs.existsSync(hw.dataDir + "/subject.json")){
         throw new Error(`subject.json not found in ${hw.dataDir} directory`);
-        process.exit(1)
     }
 
     const submissions = await getSubmissions(configSubject, hw.name)

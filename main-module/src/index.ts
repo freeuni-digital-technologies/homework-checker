@@ -33,5 +33,5 @@ export async function main(hw: HwConfig, runOpts: RunOpts) {
 if (require.main == module) {
     const  { hw, runOpts } = getArgs()
     main(hw, runOpts)
-        .then(e => console.log("done."))
+        .then(() => console.log("done."))
 }

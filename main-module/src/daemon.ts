@@ -4,10 +4,10 @@ import {CronJob} from 'cron'
 
 // TODO იმის შემოწმება, ახლა გაეშვას თუ არა დავალება, აქ უნდა მოხდეს და არა yarn start-ში
 async function go(){
-	var homework = getCurrentHWs()
+	let homework = getCurrentHWs()
 	homework.forEach(async v => {
 		console.log('yarn start --hw ' + v.id)
-		var { stdout, code }  = shell.exec('yarn start --hw ' + v.id)
+		let { stdout, code }  = shell.exec('yarn start --hw ' + v.id)
 		// console.log(res)
 		// console.log()
 		if(code != 0 || stdout.search('no new submissions')!=-1) {
@@ -24,9 +24,9 @@ async function go(){
 
 async function main() {
 console.log("starting cron job")
-	go()
-	var job = new CronJob('*/10 * * * *', go, null, true, 'Asia/Tbilisi')
+	await go()
+	let job = new CronJob('*/10 * * * *', go, null, true, 'Asia/Tbilisi')
 	job.start()
 }
 
-main()
+main().then()

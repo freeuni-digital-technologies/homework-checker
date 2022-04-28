@@ -3,7 +3,7 @@ import {Submission} from 'dt-types'
 import {Partitions} from './partitions'
 import {HwConfig} from './homework'
 import {StudentList} from "classroom-api";
-import {config, results_path, submissions_path} from "./config";
+import {results_path, submissions_path} from "./config";
 
 export interface RunOpts {
     trial?: boolean,
@@ -30,12 +30,12 @@ export class Run {
 
     public lastRun: number
     public currentRun: number
-    private logs: Date[]
-    private lastRunDate: Date
+    readonly logs: Date[]
+    readonly lastRunDate: Date
     public previousRunInfo: Partitions<Submission[]>
     public moveDir: string
-    private path: string
-    private logFile: string
+    readonly path: string
+    readonly logFile: string
     private dataPath: string
     constructor(private hw: HwConfig, public opts: RunOpts, lastRun?: number) {
         this.path = `${results_path}/${hw.id}`

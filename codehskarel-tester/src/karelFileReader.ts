@@ -4,20 +4,6 @@ import { Karel } from 'jskarel'
 import fs from 'fs'
 import { Config } from 'dt-types'
 
-const customStuctures:any[] = [
-    // {
-    //     regex: /repeat\s*\((\s*[\d|\w]+\s*)\)/g,
-    //     replace: (match: RegExpMatchArray) => `for (let i=0; i < ${match[1]}; i++)`
-    // },
-    // {
-    //     regex: /return\(\)/g,
-    //     replace: () => `repeatFunction()`
-    // },
-    // {
-    //     regex: /switch\(\)/g,
-    //     replace: () => `switchFunction()`
-    // }
-]
 function replaceCustomStructures(fileName: string) {
     let contents = fs.readFileSync(fileName, 'utf8')
     const newFile = fileName + '.fixed'
@@ -29,17 +15,6 @@ function replaceCustomStructures(fileName: string) {
     // }
     // ${contents.substr(functionsStart, contents.length)}
     // `
-    const replaced = customStuctures.map(structure => {
-        const regex = structure.regex
-        if (contents.match(regex) == null)
-            return false
-        const matches = [...contents['matchAll'](regex)]
-        matches.forEach(match => {
-            const replacement = structure.replace(match)
-            contents = contents.replace(match[0], replacement)
-        })
-        return true
-    })
     // with codehs it's always a new file because of function main()
     fs.writeFileSync(newFile, contents)
     return newFile
@@ -80,6 +55,5 @@ export function setUpSubmission(fileName: string, config: Config = {}) {
     return {
         main: main,
         karel: karel,
-        world: world
     }
 } 

@@ -41,13 +41,16 @@ class HwConfigProp {
     public module: string = "";
 }
 
-/* Message Constructors for not existence properties and invalid properties */
+/* Message Constructors */
 
 function printPropertyDoesNotExistMessage(propertyName: string){
     console.log(`Config object does not have '${propertyName}' property`);
 }
 function printPropertyIllegalTypeMessage(propertyName: string, propertyType: string){
     console.log(`Property '${propertyName}' should be type of '${propertyType}'`);
+}
+function printInvalidTestFileNameMessage(testFileName:string){
+    console.log(`File "${testFileName}" not found`);
 }
 
 /* Checks if given configuration of homework is valid */
@@ -101,6 +104,7 @@ export function readHomeworkConfiguration(configPath: string): HwConfig {
     }
     const preHwConfig = configFile;
     checkGivenHwConfigProps(preHwConfig);
+    checkTestFileValidity(absolutePath.substring(0, absolutePath.lastIndexOf("/")), preHwConfig.testFileName);
 
     return convertGivenHwConfigToInterface(preHwConfig, absolutePath);
 }
@@ -131,8 +135,8 @@ function getConfigsOfCurrentHomeworks(): HwConfig[] {
 }
 
 export function getCurrentHWs() {
-    var now = new Date()
-    var aWeekAfterNow = new Date()
+    let now = new Date()
+    let aWeekAfterNow = new Date()
     aWeekAfterNow.setDate(aWeekAfterNow.getDate()+11)
 
     const homeworks = getConfigsOfCurrentHomeworks();
@@ -141,7 +145,15 @@ export function getCurrentHWs() {
             hw.deadlineMinutes = 'T23:59:59+04:00'
         return hw
     }).filter(hw => {
-        var deadline = new Date(hw.deadline+hw.deadlineMinutes)
+        let deadline = new Date(hw.deadline+hw.deadlineMinutes)
         return now <= deadline && deadline < aWeekAfterNow
     })
+}
+
+function checkTestFileValidity(absolutePath:string, testFileName:string){
+    const testPath = `${absolutePath}/${testFileName}`;
+    if(!fs.existsSync(testPath)){
+        printInvalidTestFileNameMessage(testFileName)
+        process.exit(-1)
+    }
 }

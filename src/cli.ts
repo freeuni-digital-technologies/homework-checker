@@ -26,23 +26,28 @@ export function getArgs(hwName?: string): EnvOptions {
     parser.addArgument(['-k', '--skip'], {help: 'skip check of id'})
     parser.addArgument(['-l', '--late'], {help: 'ignore late of id'})
     parser.addArgument(['-p', '--config-path'], {help: 'location of homework config'})
-    parser.addArgument(['-dr','--data-dir'], {help: "location of data folder"})
+    parser.addArgument(['-i','--data-dir'], {help: "location of data folder"})
     const args = parser.parseArgs()
     const hwId: string = hwName || args['hw']
-
-    if (!hwId) {
-        console.log('provide submission id')
-        process.exit(1)
-    }
 
     /* Configuration Folder Path */
     let configPath: string = args['config_path']
     if (!configPath) {
-        configPath = defaultHomeworkPath(hwId);
+        if(!hwId) {
+            console.log('provide submission id')
+            process.exit(1)
+        }else{
+            configPath = defaultHomeworkPath(hwId);
+        }
     }
     configPath = path.resolve(__dirname, configPath)
 
     const hwConfig = readHomeworkConfiguration(configPath);
+
+    if (!hwConfig) {
+        console.log('provide valid submission id')
+        process.exit(1)
+    }
 
     /* Data Folder Path */
     const dataPath: string = args['data_dir']
@@ -52,11 +57,6 @@ export function getArgs(hwName?: string): EnvOptions {
         hwConfig.dataDir = path.resolve(__dirname, dataPath)
     }
 
-
-    if (!hwConfig) {
-        console.log('provide valid submission id')
-        process.exit(1)
-    }
     let download = true
     if (args.download == 'false') {
         download = false

@@ -80,8 +80,9 @@ export class WebTester {
 
     visitPage(path: string): Promise<Result[]> {
         const timeoutError: Result[] = [{error: true, message: 'tester timeout exceeded 30 seconds'}]
+        const addressInUseError: Result[] = [{message: "address in use"}]
         return (new Promise((resolve, reject) => {
-            let timeout = setTimeout(() => {
+            var timeout = setTimeout(() => {
                 reject(timeoutError)
             }, 30000)
             this.server.on('message', (m: Result[]) => {
@@ -89,7 +90,7 @@ export class WebTester {
                 resolve(m)
             })
             // console.log('testing file:' + path)
-            this.driver.get(path).then()
+            this.driver.get(path)
         }))
     }
 

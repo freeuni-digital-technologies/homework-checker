@@ -1,6 +1,6 @@
 import { Submission } from 'dt-types'
 import { HwConfig } from "./homework"
-import { Run, RunOpts } from './runs'
+import { Run, log, RunOpts } from './runs'
 
 type S = Submission
 export interface Partitions<T> {

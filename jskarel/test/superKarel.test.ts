@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import { Karel } from '../src'
+import { Wall } from '../src/wall'
 import { C } from '../src/coordinates'
 
 describe('superkarel movement', () => {

@@ -131,8 +131,8 @@ function getConfigsOfCurrentHomeworks(): HwConfig[] {
 }
 
 export function getCurrentHWs() {
-    let now = new Date()
-    let aWeekAfterNow = new Date()
+    var now = new Date()
+    var aWeekAfterNow = new Date()
     aWeekAfterNow.setDate(aWeekAfterNow.getDate()+11)
 
     const homeworks = getConfigsOfCurrentHomeworks();
@@ -141,7 +141,7 @@ export function getCurrentHWs() {
             hw.deadlineMinutes = 'T23:59:59+04:00'
         return hw
     }).filter(hw => {
-        let deadline = new Date(hw.deadline+hw.deadlineMinutes)
+        var deadline = new Date(hw.deadline+hw.deadlineMinutes)
         return now <= deadline && deadline < aWeekAfterNow
     })
 }

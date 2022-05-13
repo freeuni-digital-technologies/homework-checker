@@ -1,13 +1,12 @@
-import { config } from './config'
-import { getArgs } from './cli'
+import {config} from './config'
+import {getArgs} from './cli'
 
-import { createDrive, getSubmissions, saveFile, StudentList, Authenticator } from 'classroom-api'
+import {Authenticator, createDrive, getDueDate, getSubmissions, saveFile, StudentList} from 'classroom-api'
 import {Run, RunOpts} from './runs'
-import { partitionResults } from './partitions'
+import {partitionResults} from './partitions'
 
-import { getSubmissionsWithResults } from "./homeworkChecker";
+import {getSubmissionsWithResults} from "./homeworkChecker";
 import {HwConfig} from "./homework";
-
 
 
 export async function main(hw: HwConfig, runOpts: RunOpts) {
@@ -24,8 +23,8 @@ export async function main(hw: HwConfig, runOpts: RunOpts) {
 
     const results = await Promise.all(submissions)
     const output = partitionResults(results, hw)
-
-    run.saveRunInfo(output)
+    const dueDate = await getDueDate(config.subject, hw.name, auth)
+    run.saveRunInfo(output, dueDate)
     return output
 }
 
@@ -33,5 +32,5 @@ export async function main(hw: HwConfig, runOpts: RunOpts) {
 if (require.main == module) {
     const  { hw, runOpts } = getArgs()
     main(hw, runOpts)
-        .then(e => console.log("done."))
+        .then(() => console.log("done."))
 }

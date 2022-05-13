@@ -3,7 +3,7 @@ import {Submission} from 'dt-types'
 import {Partitions} from './partitions'
 import {HwConfig} from './homework'
 import {StudentList} from "classroom-api";
-import {config, results_path, submissions_path} from "./config";
+import {results_path, submissions_path} from "./config";
 
 export interface RunOpts {
     trial?: boolean,
@@ -127,7 +127,8 @@ export class Run {
                 log({}, `${partition}: ${info}`)
         }
     }
-    saveRunInfo(output: Partitions<Submission[]>) {
+
+    saveRunInfo(output: Partitions<Submission[]>, dueDate: Date) {
         this.logRunInfo(output)
         // if (this.opts.trial) {
         //     return
@@ -155,6 +156,7 @@ export class Run {
         if (!this.logs.length || currentLastDate.getTime() > this.lastRunDate.getTime()) {
             this.logs.push(currentLastDate)
         }
+
         console.log(submissions.length, length)
         if (this.opts.trial)
             return

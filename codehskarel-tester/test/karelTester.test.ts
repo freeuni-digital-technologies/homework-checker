@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-import { KarelTester } from '../src/karelTester'
+import { KarelTester } from '../src'
 
 const path = `${__dirname}/files`
 

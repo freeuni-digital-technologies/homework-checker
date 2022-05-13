@@ -1,6 +1,7 @@
-import { ClassroomApi } from './classroom-api'
-import { UserProfile } from './types'
-import { Authenticator } from './authenticate'
+import {ClassroomApi} from './classroom-api'
+import {UserProfile} from './types'
+import {Authenticator} from './authenticate'
+
 const translit = require('translitit-latin-to-mkhedruli-georgian')
 
 function prepareProfile(p: UserProfile) {
@@ -28,10 +29,9 @@ export async function getStudentList(className: string, auth: Authenticator): Pr
 function translitName(p: UserProfile): UserProfile {
 	const transed = translit(p.name?.givenName)
 	const matches = replace.find(e => transed.includes(e[0]))
-	const res = (matches) ?
+	p.georgianName = (matches) ?
 		transed.replace(matches[0], matches[1])
 		: transed
-	p.georgianName = res
 	return p
 }
 const replace = [

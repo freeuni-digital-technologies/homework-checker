@@ -1,12 +1,9 @@
-import { Submission, Result } from 'dt-types';
-import { Run, log } from "../runs";
+import {Submission} from 'dt-types';
+import {Run} from "../runs";
+import {Drive} from "classroom-api"
 
-import path from 'path'
-import { HwConfig } from '../homework'
-import { Drive } from "classroom-api"
-
-import { SubjectModule, defaultPrepareSubmission } from '../types/module'
-import { testSubmission } from "codehskarel-tester";
+import {defaultPrepareSubmission, SubjectModule} from '../types/module'
+import {testSubmission} from "codehskarel-tester";
 
 function downloadAtInterval(submission: Submission, drive: Drive,  index: number, run: Run, saveFile: any): Promise<string> {
     const attachment = submission.attachment!

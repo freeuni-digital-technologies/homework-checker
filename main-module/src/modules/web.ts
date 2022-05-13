@@ -1,14 +1,13 @@
-import { SubjectModule } from '../types/module'
+import {SubjectModule} from '../types/module'
 
-import { Submission, Result } from "dt-types";
-import { Drive } from "classroom-api"
-import { Run, log } from "../runs";
-import { WebTester } from "website-tester"
+import {Result, Submission} from "dt-types";
+import {Drive} from "classroom-api"
+import {Run} from "../runs";
+import {WebTester} from "website-tester"
 import fs from 'fs'
 import unzipper from 'unzipper'
 
 import path from 'path'
-import { HwConfig } from '../homework'
 import * as fse from "fs-extra";
 
 
@@ -97,7 +96,7 @@ function unzipSubmission(submission: Submission, path: string, moveDir: string):
         .pipe(unzipper.Extract({path: dir}))
         .promise()
         .then(() => dir)
-        .catch((e) => {throw zipFormatError})
+        .catch(() => {throw zipFormatError})
 }
 
 function findRootFile(dir: string): string {

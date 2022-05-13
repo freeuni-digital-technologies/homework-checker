@@ -4,8 +4,8 @@ import { UserProfile } from './types'
 import { getSingleStudent } from './profile'
 
 export class StudentList {
-	private students: UserProfile[]
-	private path: string
+	private readonly students: UserProfile[]
+	private readonly path: string
 	constructor(filePath?: string) {
 		if (!filePath) {
 			console.log('path for students, searching in existing directory')

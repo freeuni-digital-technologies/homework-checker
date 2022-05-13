@@ -62,11 +62,11 @@ export function downloadAtInterval(pathToStore:string,
     const fileName = attachment.title
     const emailId = submission.emailId
     const id = attachment.id
-    var dir = ''
+    let dir: string;
     if(createDirs)
-        dir = `${pathToStore}/${emailId}`
+        dir = `${pathToStore}/${emailId}/${fileName}`
     else 
-        dir = `${pathToStore}`
+        dir = `${pathToStore}/${fileName}`
     const path = `${dir}/${fileName}`
     
     if(skipExisting && fs.existsSync(path)){
@@ -153,7 +153,7 @@ export async function downloadAll(pathToStore:string,
                                     skipExisting:boolean,
                                     studentList: StudentList,
                                     auth: Authenticator): Promise<string[]>{
-    return downloadWithFilter(pathToStore, className, hw, createDirs, allowLates, autoExtract, skipExisting, (s:Submission)=>true, studentList, auth)
+    return downloadWithFilter(pathToStore, className, hw, createDirs, allowLates, autoExtract, skipExisting, ()=>true, studentList, auth)
 }
 
 export async function downloadSome(pathToStore:string, 
@@ -244,5 +244,5 @@ if (require.main === module) {
         }
         
     }
-    main()
+    main().then()
 }

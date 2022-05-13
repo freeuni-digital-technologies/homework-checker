@@ -8,12 +8,4 @@ export interface StudentSubmission extends classroom_v1.Schema$StudentSubmission
 
 }
 
-export interface StateHistory extends classroom_v1.Schema$StateHistory {
-
-}
 export type Drive = drive_v3.Drive
-
-export interface HomeWork {
-    name: string,
-    id: string
-}

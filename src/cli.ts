@@ -54,7 +54,7 @@ export function getArgs(hwName?: string): EnvOptions {
     if(!dataPath){
         hwConfig.dataDir = path.resolve(__dirname, `../../../data`)
     }else{
-        hwConfig.dataDir = path.resolve(__dirname, dataPath)
+        hwConfig.dataDir = path.resolve(process.cwd(), dataPath)
     }
 
     let download = true

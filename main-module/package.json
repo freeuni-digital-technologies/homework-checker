@@ -12,11 +12,13 @@
     "daemon": "node lib/daemon.js"
   },
   "dependencies": {
+    "@types/marked": "^4.0.3",
     "argparse": "^1.0.10",
     "classroom-api": "^1.0.2",
     "codehskarel-tester": "^1.0.0",
     "cron": "^1.8.2",
     "fs-extra": "^10.0.0",
+    "marked": "^4.0.16",
     "mock": "^0.1.1",
     "node-html-parser": "^5.2.0",
     "shelljs": "^0.8.4",

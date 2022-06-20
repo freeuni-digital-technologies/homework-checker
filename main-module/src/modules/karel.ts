@@ -8,7 +8,7 @@ import { Drive } from "classroom-api"
 import { SubjectModule, defaultPrepareSubmission } from '../types/module'
 import { testSubmission } from "codehskarel-tester";
 
-function downloadAtInterval(submission: Submission, drive: Drive,  index: number, run: Run, saveFile: any): Promise<string> {
+export function downloadAtInterval(submission: Submission, drive: Drive,  index: number, run: Run, saveFile: any): Promise<string> {
     const attachment = submission.attachment!
     const fileName = attachment.title
     const id = attachment.id

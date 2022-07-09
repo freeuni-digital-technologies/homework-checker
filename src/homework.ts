@@ -2,6 +2,7 @@ import { Partitions } from './partitions'
 import fs from "fs";
 import path from 'path'
 import { EmailTemplate } from './templates';
+import {defaultDataPath} from "./scripts/sumResults";
 
 
 
@@ -85,7 +86,7 @@ function convertGivenHwConfigToInterface(preHwConfig: any, path: string){
         name: preHwConfig.classroomName,
         module: preHwConfig.module,
         deadline: preHwConfig.deadline,
-        dataDir: preHwConfig.data_dir,
+        dataDir: preHwConfig.data_dir || defaultDataPath,
         configPath: path,
         testFileName: preHwConfig.testFileName,
         emailTemplates: preHwConfig.emailTemplates

@@ -2,6 +2,9 @@ import fs from 'fs'
 import path from 'path'
 import {DEFAULT_HW_CONFIG_PATH, readHomeworkConfiguration} from '../homework'
 import {mergeResults} from '../partitions'
+import {logProjectResults, projectFilesPath, ProjectResult, projectsPath} from "./sumProjectResults";
+import {ProjectsInfo} from "../types/projectsInfo";
+import fse from "fs-extra";
 
 // TODO აქ არის წასაკითხი data path
 const defaultHwPath = path.resolve(__dirname, '../' + DEFAULT_HW_CONFIG_PATH)
@@ -45,7 +48,7 @@ function addManualResults(results: any, studentNames: String[], manualResultsPat
         .readdirSync(manualResultsPath)
         .filter(f => f.includes('.csv'))
         .forEach(f => {
-            if (f.includes("quiz")) {
+            if (f.includes("quiz") && !f.includes('users')) {
                 addQuizCsvResults(results, studentNames, manualResultsPath, f)
             } else {
                 addSimpleCsvResults(results, studentNames, manualResultsPath, f)
@@ -89,12 +92,23 @@ function addQuizCsvResults(results: any, studentNames: String[], manualResultsPa
     const name = 'quiz' + quizId
     // @ts-ignore
     studentNames.forEach(n => results[n][name] = 0)
+    const studentNameOverrides: any = {}
+    const overridesFile = name + '_users.csv'
+    if (fs.existsSync(manualResultsPath + '/' + overridesFile)) {
+        readCsv(manualResultsPath, name + '_users.csv')
+            .forEach(line => studentNameOverrides[line[0]] = line[1])
+    }
     readCsv(manualResultsPath, resultsFile)
         .forEach(line => {
             const emailId = line[4].split('@')[0].toLowerCase().trim()
             const score = isNaN(Number(line[9])) ? 0 : Number(line[9])
             if (studentNames.includes(emailId)) {
                 results[emailId][name] = score
+            } else if (line[0] == 'placement') {
+                const userId = line[1].split('-')[1]
+                if (studentNameOverrides[userId]) {
+                    results[studentNameOverrides[userId]][name] = score
+                }
             } else {
                 invalidEntries.push({
                     name: name,

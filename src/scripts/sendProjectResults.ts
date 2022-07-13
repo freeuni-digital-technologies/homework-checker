@@ -4,35 +4,22 @@ import fse from "fs-extra";
 import { ProjectsInfo } from "../types/projectsInfo";
 import {summarizeResults} from "./sumResults";
 import {ProjectGroup} from "../modules/groupProject";
-
-const projectsPath = "/Users/ia/dev/data"
-const projectFilesPath = projectsPath + '/files'
-
-function logProjectResults(results: ProjectResult[], pi: ProjectsInfo) {
-    const projectScores = flattenProjectResults(results, pi)
-        .map(e => {
-            const { result, emailId } = e
-            return `${emailId},${result.sum()}`
-        }).join('\n')
-
-    fse.writeFileSync("/Users/ia/dev/data/manualResults/project.csv", projectScores)
-}
+import {
+    ProjectResult,
+    logProjectResults,
+    projectsPath,
+    projectFilesPath,
+    flattenProjectResults
+} from './sumProjectResults';
 
 
-function flattenProjectResults(results: ProjectResult[], pi: ProjectsInfo) {
-    return results
-        .map(r => Array.from(new Set(pi.findTeamWithId(r.groupId)!.members)).map(m => {
-            return {result: r, emailId: m}
-        }))
-        .flat()
-}
 
 function notifyResults() {
     const parser = new ArgumentParser({
         addHelp: true
     })
     parser.addArgument(['-t', '--trial'], {help: 'dont save output/print emails not send'})
-    parser.addArgument(['-c', '--continue'], {help: 'continue from emailid'})
+    parser.addArgument(['-c', '--continue'], {help: 'continue from email id'})
     const args = parser.parseArgs()
     const results = JSON.parse(fse.readFileSync('/Users/ia/dev/data/manualResults/project_scores.json', 'utf-8'))
         .map((e: any) => new ProjectResult(e))
@@ -146,27 +133,6 @@ function message(result: ProjectResult) {
         <p>შენმა პროექტმა ასევე მიიღო ეს დამატებითი კომენტარი:</p>
         <p><em><strong>${result.comment}</strong></em></p>
         `
-}
-
-class ProjectResult {
-    public functionality: number;
-    public groupId: string;
-    public design: number;
-    public concept: number;
-    public report: number;
-    public comment: string;
-    constructor(json: any) {
-        this.functionality = json.functionality
-        this.groupId = json.id
-        this.design = json.design
-        this.concept = json.concept
-        this.report = json.report
-        this.comment = json.comment
-    }
-    sum() {
-        return this.design + this.concept + this.report + this.functionality
-    }
-
 }
 
 const defaultScores = {

@@ -24,6 +24,10 @@ export function summarizeResults(
     const results: any = {}
     studentNames.forEach(s => results[s] = {sum: 0})
     addHomeworkResults(results, studentNames, homeworksPath)
+    const projectResults = JSON.parse(fse.readFileSync('/Users/ia/dev/data/manualResults/project_scores.json', 'utf-8'))
+        .map((e: any) => new ProjectResult(e))
+    const pi = new ProjectsInfo(projectsPath + '/projects.json', projectFilesPath)
+    logProjectResults(projectResults, pi)
     addManualResults(results, studentNames, manualResultsPath)
     studentNames.forEach(emailId => {
         const studentResults = results[emailId]

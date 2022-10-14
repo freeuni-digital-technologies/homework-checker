@@ -6,8 +6,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "start": "NODE_ENV=production node --trace-uncaught lib/index.js",
-    "notify": "NODE_ENV=production node lib/notifications.js",
+    "start": "cross-env NODE_ENV=production node --trace-uncaught lib/index.js",
+    "notify": "cross-env NODE_ENV=production node lib/notifications.js",
     "test": "ts-mocha test/**/*.test.ts",
     "daemon": "node lib/daemon.js"
   },

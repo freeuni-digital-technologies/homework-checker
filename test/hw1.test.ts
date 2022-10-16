@@ -2,7 +2,6 @@ import { expect } from 'chai'
 
 
 import { testSubmission} from 'codehskarel-tester'
-import { Result } from 'dt-types'
 
 const testPath = `${__dirname}/resources`
 const solPath = `${__dirname}/test/files`

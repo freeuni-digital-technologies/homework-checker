@@ -30,12 +30,12 @@ export class Run {
 
     public lastRun: number
     public currentRun: number
-    private logs: Date[]
-    private lastRunDate: Date
+    readonly logs: Date[]
+    readonly lastRunDate: Date
     public previousRunInfo: Partitions<Submission[]>
     public moveDir: string
-    private path: string
-    private logFile: string
+    readonly path: string
+    readonly logFile: string
     private dataPath: string
     constructor(private hw: HwConfig, public opts: RunOpts, lastRun?: number) {
         const dataConfig = config(hw.dataDir)

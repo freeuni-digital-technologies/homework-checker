@@ -1,5 +1,5 @@
 import {Submission} from "dt-types";
-import {Drive, downloadError} from 'classroom-api'
+import {downloadError, Drive} from 'classroom-api'
 import {log, Run} from "./runs";
 
 import path from 'path'
@@ -24,23 +24,19 @@ export async function getSubmissionsWithResults(configSubject: string, hw: HwCon
     const testPath = path.resolve(path.dirname(hw.configPath), hw.testFileName)
     if(!fs.existsSync(testPath)){
         throw new Error("Invalid Test Path")
-        process.exit(1)
     }
 
     if(!fs.existsSync(hw.dataDir + "/subject.json")){
         throw new Error(`subject.json not found in ${hw.dataDir} directory`);
-        process.exit(1)
     }
 
-    const submissions = await getSubmissions(configSubject, hw.name)
-    // TODO ეს სამი ერთ ფუნქციაში და სტრუქტურა უფრო გამოიკვეთოს
-        .then(submissions => sliceSubmissions(submissions,run.opts.slice))
+    return await getSubmissions(configSubject, hw.name)
+        // TODO ეს სამი ერთ ფუნქციაში და სტრუქტურა უფრო გამოიკვეთოს
+        .then(submissions => sliceSubmissions(submissions, run.opts.slice))
         .then(submissions => filterSubmissions(submissions, run, hw))
         .then(submissions => filterSubmissionsByAttachment(submissions))
         .then(logDownloadingSubmissions)
-        .then(submissions => processSubmissions(submissions,testPath,drive, run, saveFile));
-
-    return submissions
+        .then(submissions => processSubmissions(submissions, testPath, drive, run, saveFile))
 }
 
 const existingModules: any = {

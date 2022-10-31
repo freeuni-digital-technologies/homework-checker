@@ -11,6 +11,7 @@ import {fileNotFoundError, moduleWeb, zipFormatError} from './modules/web'
 import {moduleKarel} from './modules/karel'
 import {filesNotFoundError, moduleProject, teamNameNotFoundError} from "./modules/groupProject";
 import fs from "fs";
+import {moduleMarkdown} from "./modules/markdown";
 
 // TODO this should be a private member when refactored to class
 // @ts-ignore
@@ -42,7 +43,8 @@ export async function getSubmissionsWithResults(configSubject: string, hw: HwCon
 const existingModules: any = {
     'web': moduleWeb,
     'karel': moduleKarel,
-    'groupProject': moduleProject
+    'groupProject': moduleProject,
+    'markdown': moduleMarkdown
 }
 
 export function setSubmissionModule(hw: HwConfig) {

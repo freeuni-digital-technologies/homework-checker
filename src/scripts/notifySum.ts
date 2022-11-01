@@ -4,7 +4,7 @@ import {summaries} from "../templates";
 import { ArgumentParser } from 'argparse'
 import fs from "fs";
 import path from "path";
-import { defaultDataPath} from "./sumResults";
+import {defaults} from "../config";
 
 function notifyEmails() {
     const parser = new ArgumentParser({
@@ -65,7 +65,7 @@ ${Object.keys(scores)
 if (require.main == module) {
     const results = convertToCsv(notifyEmails())
     fs.writeFileSync(path.resolve(process.cwd(), '../results.csv'), results)
-    fs.writeFileSync(defaultDataPath + '/results.csv', results)
+    fs.writeFileSync(path.join(defaults.dataDir + '/results.csv'), results)
 }
 
 

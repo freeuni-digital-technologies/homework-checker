@@ -63,7 +63,9 @@ export function notify(
     const continuefrom = runOpts.continue ? emails.map(e => e.to).indexOf(failedEmail) : 0
     const emailsToSend = emails.slice(continuefrom, emails.length)
     if (runOpts.trial) {
-        console.log(emailsToSend)
+        if (runOpts.logOutput) {
+            console.log(emailsToSend)
+        }
     } else  {
         sendEmails(emailsToSend, 2000)
     }

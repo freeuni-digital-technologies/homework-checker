@@ -3,7 +3,7 @@ import {Submission} from 'dt-types'
 import {Partitions} from './partitions'
 import {HwConfig} from './homework'
 import {StudentList} from "classroom-api";
-import {config} from "./config";
+import {config, defaults} from "./config";
 
 export interface RunOpts {
     trial?: boolean,
@@ -12,8 +12,10 @@ export interface RunOpts {
     continue?: string,
     slice?: number,
     download?: boolean,
-    omit?: string[]
+    omit?: string[],
+    logOutput?: boolean
 }
+
 export function log<T>(e: T, message: string) {
     if (process.env.NODE_ENV === 'production') {
         console.log(message)
@@ -38,9 +40,10 @@ export class Run {
     readonly logFile: string
     private dataPath: string
     constructor(private hw: HwConfig, public opts: RunOpts, lastRun?: number) {
-        const dataConfig = config(hw.dataDir)
+        const dataDir = hw.dataDir || defaults.dataDir
+        const dataConfig = config(dataDir)
         this.path = `${dataConfig.results_path}/${hw.id}`
-        this.dataPath = hw.dataDir
+        this.dataPath = dataDir
         this.moveDir = `${dataConfig.submissions_path}/${hw.id}`
         try {
             fs.mkdirSync(this.moveDir)
@@ -157,8 +160,6 @@ export class Run {
         if (!this.logs.length || currentLastDate.getTime() > this.lastRunDate.getTime()) {
             this.logs.push(currentLastDate)
         }
-
-        console.log(submissions.length, length)
         if (this.opts.trial)
             return
         fs.writeFileSync(this.logFile, JSON.stringify(this.logs))

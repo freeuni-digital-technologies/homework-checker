@@ -1,4 +1,4 @@
-import {config} from './config'
+import {config, defaults} from './config'
 import {getArgs} from './cli'
 
 import {Authenticator, createDrive, getDueDate, getSubmissions, saveFile, StudentList} from 'classroom-api'
@@ -8,9 +8,8 @@ import {partitionResults} from './partitions'
 import {getSubmissionsWithResults} from "./homeworkChecker";
 import {HwConfig} from "./homework";
 
-
 export async function check(hw: HwConfig, runOpts: RunOpts) {
-    const dataConfig = config(hw.dataDir)
+    const dataConfig = config(hw.dataDir || defaults.dataDir)
     const run = new Run(hw, runOpts)
     // const auth = new Authenticator(config.CLASSROOM_TOKEN_PATH, config.CLASSROOM_CREDENTIALS_PATH)
     const auth = new Authenticator(hw.dataDir + "/credentials/token.json", hw.dataDir + "/credentials/credentials.json")

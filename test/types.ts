@@ -33,7 +33,7 @@ export const notifyAll: Partitions<boolean> = {
 }
 
 export function testRun(): RunOpts {
-    return {  trial: true }
+    return {  trial: true, logOutput: false }
 }
 
 export function defaultConfig(): HwConfig  {

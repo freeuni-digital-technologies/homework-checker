@@ -1,344 +1,39 @@
-import {
-    filterSubmissions,
-    getSubmissionsWithResults,
-    processSubmissions,
-    setSubmissionModule,
-    sliceSubmissions
-} from "../src/homeworkChecker";
-
-import {expect} from "chai";
-import {Run} from "../src/runs";
-
-import {anything, instance, mock, when} from "ts-mockito";
 import {HwConfig} from "../src/homework";
-import {Result, Submission} from "dt-types";
-import * as path from "path";
-import {main} from "../src";
-import {RunOpts} from "../src/runs"; // ??
-
-
-const hw: HwConfig = {
-    id: "hwx",
-    name: "hwxname",
-    module: 'karel',
-    configPath: '',
-    deadline: "2001-01-01",
-    testFileName: "testFileName",
-}
-
-
-describe("Integration Tests",() => {
-
-    it("Init Test",(done) => {
-        done();
-    })
-
-    it("Slice Submissions Functionality Test",(done) => {
-        /* UNDEFINED SLICE */
-        let slice: number | undefined = undefined;
-
-        const submissions: any[] = [ 1, 2, 3]
-
-        let result = sliceSubmissions(submissions,slice);
-
-        expect( 3 == result.length ).to.be.true;
-
-        /* MIDDLE SLICE */
-
-        slice = 1;
-
-        result = sliceSubmissions(submissions,slice);
-
-        expect( 1 == result.length ).to.be.true
-
-
-        /* OUTER SLICE */
-        slice = 5;
-
-        result = sliceSubmissions(submissions,slice);
-
-        expect( 3 == result.length).to.be.true;
-        
-        done();
-    })
-
-    it("Filter Submissions Functionality Test 1",(done) => {
-        let run: Run = mock(Run);
-
-        let submission: any = { emailId: "emailId1" };
-
-        when(run.forceCheck(submission)).thenReturn(false);
-        when(run.newSubmission(submission)).thenReturn(false);
-        
-        let actualInstanceOfRun = instance(run);
-
-
-        expect( 0 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.true;
-        
-        done();
-    })
-
-    it("Filter Submissions Functionality Test 2",(done) => {
-        let run: Run = mock(Run);
-
-        let submission: any = { emailId: "emailId1" };
-
-        when(run.forceCheck(submission)).thenReturn(true);
-        when(run.newSubmission(submission)).thenReturn(false);
-
-        let actualInstanceOfRun = instance(run);
-
-
-        expect(1 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.true;
-
-        hw.skip = [submission];
-
-        expect(0 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.false;
-        
-        done();
-    })
-
-    it("Filter Submissions Functionality Test 3",(done) => {
-        let run: Run = mock(Run);
-
-        let submission: any = { emailId: "emailId1" };
-
-        when(run.forceCheck(submission)).thenReturn(false);
-        when(run.newSubmission(submission)).thenReturn(true);
-
-        hw.skip = []
-        let actualInstanceOfRun = instance(run);
-
-
-        expect(1 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.true;
-        
-        hw.skip = [submission];
-
-        expect(0 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.false;
-
-        done();
-    })
-
-    it("Filter Submissions Functionality Test 4",(done) => {
-        let run: Run = mock(Run);
-
-        let submission: any = { emailId: "emailId1" };
-
-        
-        when(run.forceCheck(submission)).thenReturn(true);
-        when(run.newSubmission(submission)).thenReturn(true);
-
-        let actualInstanceOfRun = instance(run);
-
-        hw.skip = []
-
-        expect(1 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.true;
-        
-        hw.skip = [submission];
-
-        expect(0 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.false;
-
-        done();
-
-    });
-
-    /*
-        Finish Submissions Tests Section.
-
-        TODO: Not finished testing
-    */
-    it.skip("Finish Submissions Test ( False Force Check && Submission Does Not Qualify )",(done) => {
-        const run: Run = mock(Run);
-
-        when(run.forceCheck(anything())).thenReturn(false);
-        
-        const submissions: any = [
-            {
-                qualifies: () => { return false },
-                attachment: "attach1"
-            },
-            {
-                qualifies: () => { return false },
-                attachment: "attach2"
-            }
-        ];
-
-        processSubmissions(submissions,"",null,instance(run),null).then(results => {
-            Promise.all(results).then(retrieves => {
-                for(let i=0; i < retrieves.length; i++){
-                    expect(retrieves[i].attachment).to.equal(submissions[i].attachment);
-                }
-        
-                done();
-            })
-        })
-    })
-
-    function mockRunForFinishSubmissionTest(){
-        const run: Run = mock(Run);
-        when(run.forceCheck(anything())).thenReturn(true);
-
-        let runInstance: Run = instance(run);
-        runInstance.moveDir = path.resolve(__dirname,"./files/integrationTest/submissionFiles")
-        runInstance.opts = { download: true, omit: null }
-
-        return runInstance;
-    }
-
-    function createFakeSaveFileFunction(){
-        return function(first,second,third){
-            return new Promise((resolve,reject) => {
-                resolve("");
-            });
-        }
-    }
-
-    function getSubmissionsAndResults(){
-        return require(path.resolve(__dirname,"./files/integrationTest/submissionsAndResults.js"));
-    }
-
-    function findResultInSamples(submissionsAndResultsJS, identifier: string, id: string){
-        return submissionsAndResultsJS.results[identifier].find(result => result.id == id);
-    }
-
-    async function getTestResultsForSubmissions(submissions){
-
-        let runInstance = mockRunForFinishSubmissionTest();
-
-        const fakeSaveFile = createFakeSaveFileFunction();
-
-        const results: Submission[] = await Promise.all(submissions.map((submission) => {
-            const hwId: string = submission.hwId;
-            const testPath = path.resolve(__dirname,`../resources/hw2tester.js`);
-            const sbmssn: Submission = fromResponse(submission);
-            
-            return processSubmissions([sbmssn],testPath,null,runInstance,fakeSaveFile)
-                .then(s => s[0])
-        }))
-        return results;
-    }
-
-    // საშინელებაა ეს
-    it.skip("Finish Submissions Test ( Actual Testing ) ", async () => {
-        const submissionsAndResultsJS = getSubmissionsAndResults();
-
-        const submissions = submissionsAndResultsJS.submissions;
-
-        const results: Submission[] = await getTestResultsForSubmissions(submissions);
-        results.forEach((submission: Submission) => {
-            let testResults: Result[] = submission.results;
-
-            if(testResults[0].error){
-                let foundError = findResultInSamples(submissionsAndResultsJS, "error",submission.emailId);
-                expect(foundError).to.not.be.undefined;
-                return;
-            }
-
-            let passed: boolean = testResults.every(testResult => testResult.passed);
-            if(passed){
-                let foundPassed = findResultInSamples(submissionsAndResultsJS, "passed",submission.id);
-                expect(foundPassed).to.not.be.undefined;
-            } else {
-                let foundNotPassed = findResultInSamples(submissionsAndResultsJS, "failed",submission.id);
-                expect(foundNotPassed).to.not.be.undefined;
-            }
-            
-        })
-    })
-
-    function createFakeGetSubmissionsFunction(returnSubmissions: Submission[]){
-        return function(a: string, b: string){
-            return Promise.all(returnSubmissions);
-        }
-    }
-
-    it("Test Getting Submissions With Results",async () => {
-        const submissionsAndResultsJS = getSubmissionsAndResults();
-
-        const rawSubmissions = submissionsAndResultsJS.submissions
-
-        const submissions: Submission[] = rawSubmissions.map(e => fromResponse(e));
-
-        const fakeGetSubmissions = createFakeGetSubmissionsFunction(submissions);
-        const fakeSaveFile = createFakeSaveFileFunction();
-        const runInstance = mockRunForFinishSubmissionTest();
-        const fakeHwConfig: HwConfig = {
-            id: "hw2",
-            name: "second homework",
-            deadline: "undefined",
-            module: "karel", // ეს არ მუშაობს იმიტომ რომ მთავარ ფუნქციას არ ვიძახებთ
-            configPath: '../dt-homeworks/hw2/config.js',
-            testFileName: "hw2tester.js"
-        }
-        // TODO ეს არ მუშაობს
-        setSubmissionModule(fakeHwConfig)
-        const resultsPromise = await getSubmissionsWithResults("any",fakeHwConfig,runInstance, null, fakeSaveFile, fakeGetSubmissions);
-
-        const results = await Promise.all(resultsPromise);
-
-        results.forEach(result => {
-            let testResults: any[] = result.results;
-
-            if(testResults[0].error){
-                let foundError = findResultInSamples(submissionsAndResultsJS, "error",result.id);
-                expect(foundError).to.not.be.undefined;
-                return;
-            }
-
-            let passed: boolean = testResults.every(testResult => testResult.passed);
-            if(passed){
-                let foundPassed = findResultInSamples(submissionsAndResultsJS, "passed",result.id);
-                expect(foundPassed).to.not.be.undefined;
-            } else {
-                let foundNotPassed = findResultInSamples(submissionsAndResultsJS, "failed",result.id);
-                expect(foundNotPassed).to.not.be.undefined;
-            }
-            
-        })
-
-    })
-
-
-    it.skip('run hw4 test with using main test',  () => {
+import {RunOpts} from "../src/runs";
+import {check} from "../src";
+import {expect} from 'chai';
+import path = require('path');
+
+describe('', () => {
+    // use it.only when you want to run
+    // always replace with it.skip when you commit
+    it.skip('run hw3 test with using main test',  () => {
         const fakeConfigHw4: HwConfig = {
-            id: 'hw4',
-            name: 'დავალება 4',
+            id: 'hw3',
+            name: 'დავალება 3',
             module: 'karel',
-            deadline: '2021-10-28',
-            configPath: '../dt-homeworks/hw4/config.js',
-            testFileName: 'hw4tester.js',
+            deadline: '2022-10-28',
+            dataDir: path.resolve(__dirname, '../../../data'),
+            configPath: '../dt-homeworks/hw3/config.js',
+            testFileName: 'hw3tester.js',
             emailTemplates: {}
         };
         const fakeRunOpts: RunOpts = {
-                trial: false,
-                restart: false,
-                rerun: false,
-                continue: null,
-                omit:  [''],
-                slice: 10,
-                download: false
+            trial: false,
+            restart: false,
+            rerun: false,
+            continue: null,
+            omit:  [''],
+            slice: 5,
+            download: true
         };
-        return main(fakeConfigHw4, fakeRunOpts)
+        return check(fakeConfigHw4, fakeRunOpts)
             .then(output => {
-                console.log(output)
+                expect(output.error).length(0)
             })
-            .catch((ex) => console.log(ex));
-    })
+            .catch((ex) => {
+                console.log(ex)
+                expect(ex).to.be.null
+            });
+    }).timeout(20000)
 })
-
-
-function fromResponse(
-        profile: any
-    ) {
-        const submission = new Submission(
-            profile.id!,
-            profile.emailId!,
-            profile.emailAddress!, 
-            profile.state!,
-            profile.alternateLink!,
-            profile.late
-        )
-        submission.attachment = profile.attachment
-        return submission
-
-    }

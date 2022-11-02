@@ -95,8 +95,11 @@ export function readHomeworkConfiguration(configPath: string, requireTestFile: b
     try {
         configFile = require(absolutePath);
     } catch(e) {
-        console.log("Could not find homework configuration file\n" + absolutePath)
-        process.exit(-1);
+        // TODO require-ის დროს სხვა პრობლემებიც შეიძლება იყოს, მაგალითად სინტაქსი არასწორი.
+        // ეს უნდა გადაკეთდეს ისე, რომ ჯერ შემოწმდეს absolutePath არსებობს თუ არა.
+        // თუ არ არსებობს, ამოაგდოს ეს ერორი. ამის შემდეგ იყოს try catch
+        // და try catch-ის ერორში იყოს problem reading configuration file
+        throw Error("Could not find homework configuration file\n" + absolutePath)
     }
     const preHwConfig = configFile;
     checkGivenHwConfigProps(preHwConfig);
@@ -151,6 +154,8 @@ function checkTestFileValidity(absolutePath:string, testFileName:string){
     const testPath = path.join(absolutePath, testFileName);
     if(!fs.existsSync(testPath)){
         printInvalidTestFileNameMessage(testFileName)
-        process.exit(-1)
+        // TODO ეს და სხვა მნიშვნელოვანი ერორები დასაჭერია index.ts-ში
+        // და იქ მოხდეს process.exit
+        throw Error("file not found - " + testPath)
     }
 }

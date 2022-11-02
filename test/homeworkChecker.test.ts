@@ -136,12 +136,7 @@ describe("homework checker Tests",() => {
 
     });
 
-    /*
-        Finish Submissions Tests Section.
-
-        TODO: Not finished testing
-    */
-    it.skip("Finish Submissions Test ( False Force Check && Submission Does Not Qualify )",(done) => {
+    it("Finish Submissions Test ( False Force Check && Submission Does Not Qualify )", () => {
         const run: Run = mock(Run);
 
         when(run.forceCheck(anything())).thenReturn(false);
@@ -156,15 +151,19 @@ describe("homework checker Tests",() => {
                 attachment: "attach2"
             }
         ];
-
-        processSubmissions(submissions,"",null,instance(run),null).then(results => {
-            Promise.all(results).then(retrieves => {
-                for(let i=0; i < retrieves.length; i++){
-                    expect(retrieves[i].attachment).to.equal(submissions[i].attachment);
-                }
-        
-                done();
-            })
+        setSubmissionModule({
+            id: '',
+            name: '',
+            module: 'karel',
+            deadline: '',
+            subject: '_',
+            testFileName: '',
+            configPath: '',
+        })
+        return processSubmissions(submissions,"",null,instance(run),null).then(results => {
+            for(let i=0; i < results.length; i++){
+                expect(results[i].attachment).to.equal(submissions[i].attachment);
+            }
         })
     })
 

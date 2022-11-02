@@ -127,7 +127,7 @@ function addHomeworkResults(results: any, studentNames: string[], homeworksPath:
         .map(dir => dir.name)
         .map(hwName => {
             const hwPath = `${homeworksPath}/${hwName}/config.js`
-            const hw = readHomeworkConfiguration(hwPath)
+            const hw = readHomeworkConfiguration(hwPath, false)
             studentNames.forEach(s => results[s][hw.id] = 0)
             const hwResults = mergeResults(hw, {})
             hwResults

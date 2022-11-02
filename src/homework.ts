@@ -88,7 +88,7 @@ function convertGivenHwConfigToInterface(preHwConfig: any, path: string){
     return rvConfig;
 }
 
-export function readHomeworkConfiguration(configPath: string): HwConfig {
+export function readHomeworkConfiguration(configPath: string, requireTestFile: boolean=true): HwConfig {
     const absolutePath = path.resolve(__dirname, configPath);
     let configFile = null;
     try {
@@ -99,8 +99,9 @@ export function readHomeworkConfiguration(configPath: string): HwConfig {
     }
     const preHwConfig = configFile;
     checkGivenHwConfigProps(preHwConfig);
-    checkTestFileValidity(path.dirname(absolutePath), preHwConfig.testFileName);
-
+    if (requireTestFile) {
+        checkTestFileValidity(path.dirname(absolutePath), preHwConfig.testFileName);
+    }
     return convertGivenHwConfigToInterface(preHwConfig, absolutePath);
 }
 

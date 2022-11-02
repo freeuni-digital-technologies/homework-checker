@@ -11,7 +11,7 @@ import {Run} from "../src/runs";
 
 import {anything, instance, mock, when} from "ts-mockito";
 import {HwConfig} from "../src/homework";
-import {Result, Submission} from "dt-types";
+import {Submission} from "dt-types";
 import * as path from "path";
 
 
@@ -211,33 +211,6 @@ describe("homework checker Tests",() => {
         return results;
     }
 
-    // საშინელებაა ეს
-    it.skip("Finish Submissions Test ( Actual Testing ) ", async () => {
-        const submissionsAndResultsJS = getSubmissionsAndResults();
-
-        const submissions = submissionsAndResultsJS.submissions;
-
-        const results: Submission[] = await getTestResultsForSubmissions(submissions);
-        results.forEach((submission: Submission) => {
-            let testResults: Result[] = submission.results;
-
-            if(testResults[0].error){
-                let foundError = findResultInSamples(submissionsAndResultsJS, "error",submission.emailId);
-                expect(foundError).to.not.be.undefined;
-                return;
-            }
-
-            let passed: boolean = testResults.every(testResult => testResult.passed);
-            if(passed){
-                let foundPassed = findResultInSamples(submissionsAndResultsJS, "passed",submission.id);
-                expect(foundPassed).to.not.be.undefined;
-            } else {
-                let foundNotPassed = findResultInSamples(submissionsAndResultsJS, "failed",submission.id);
-                expect(foundNotPassed).to.not.be.undefined;
-            }
-            
-        })
-    })
 
     function createFakeGetSubmissionsFunction(returnSubmissions: Submission[]){
         return function(a: string, b: string){

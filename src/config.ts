@@ -13,7 +13,12 @@ export const defaults = {
 export function config(dataDir: string) {
     const dataPath = dataDir.startsWith('.') ? path.resolve(__dirname, dataDir) : dataDir
     return {
-        subject: JSON.parse(fs.readFileSync(`${dataPath}/subject.json`).toString()).subject,
+        subject: () => {
+            if(!fs.existsSync(dataPath + "/subject.json")){
+                throw new Error(`subject.json not found in ${dataPath} directory`);
+            }
+            return JSON.parse(fs.readFileSync(`${dataPath}/subject.json`).toString()).subject
+        },
         STUDENTS_DATA_PATH: `${dataPath}/students.json`,
         CLASSROOM_CREDENTIALS_PATH: `${dataPath}/credentials/credentials.json`,
         CLASSROOM_TOKEN_PATH: `${dataPath}/credentials/token.json`,

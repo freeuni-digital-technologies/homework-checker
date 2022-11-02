@@ -25,11 +25,7 @@ const hw: HwConfig = {
 }
 
 
-describe("Integration Tests",() => {
-
-    it("Init Test",(done) => {
-        done();
-    })
+describe("homework checker Tests",() => {
 
     it("Slice Submissions Functionality Test",(done) => {
         /* UNDEFINED SLICE */
@@ -250,7 +246,7 @@ describe("Integration Tests",() => {
         }
     }
 
-    it.skip("Test Getting Submissions With Results",async () => {
+    it("Test Getting Submissions With Results",async () => {
         const submissionsAndResultsJS = getSubmissionsAndResults();
 
         const rawSubmissions = submissionsAndResultsJS.submissions
@@ -264,13 +260,13 @@ describe("Integration Tests",() => {
             id: "hw2",
             name: "second homework",
             deadline: "undefined",
-            module: "karel", // ეს არ მუშაობს იმიტომ რომ მთავარ ფუნქციას არ ვიძახებთ
+            module: "karel",
+            subject: '_',
             configPath: '../dt-homeworks/hw2/config.js',
             testFileName: "hw2tester.js"
         }
-        // TODO ეს არ მუშაობს
         setSubmissionModule(fakeHwConfig)
-        const resultsPromise = await getSubmissionsWithResults("any",fakeHwConfig,runInstance, null, fakeSaveFile, fakeGetSubmissions);
+        const resultsPromise = await getSubmissionsWithResults(fakeHwConfig,runInstance, null, fakeSaveFile, fakeGetSubmissions);
 
         const results = await Promise.all(resultsPromise);
 

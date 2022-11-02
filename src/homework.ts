@@ -22,6 +22,7 @@ export interface HwConfig {
     deadlineMinutes?: string, //T23:59:00+04:00 if not set 
     exceptions?: Partitions<string[]>,
     manualChecks?: string[],
+    subject?: string,
     force?: string[],
     skip?: string[],
     emailTemplates?: Partitions<EmailTemplate>

@@ -3,7 +3,7 @@ import { summarizeResults } from '../src/scripts/sumResults'
 
 const emisFileName = __dirname + '/files/sumResults/emis_list.csv'
 const manualResultsFileName = __dirname + '/files/sumResults/manualResults'
-describe.skip('reading emis csv file', () => {
+describe('reading emis csv file', () => {
     it('should filter out repeating headings', () => {
         const results = summarizeResults(emisFileName, manualResultsFileName)
         const list = Object.keys(results)
@@ -16,7 +16,7 @@ describe.skip('reading emis csv file', () => {
     })
 })
 
-describe.skip('getting list of homeworks to process', () => {
+describe('getting list of homeworks to process', () => {
 
     it('homeworks described in config files', () => {
         const results = summarizeResults(emisFileName, manualResultsFileName)

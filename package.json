@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
+    "watch-build": "tsc -w",
     "start": "cross-env NODE_ENV=production node --trace-uncaught lib/index.js",
     "notify": "cross-env NODE_ENV=production node lib/notifications.js",
     "test": "ts-mocha test/**/*.test.ts",

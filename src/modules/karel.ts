@@ -1,6 +1,5 @@
-import {Submission} from 'dt-types';
+import {Submission, Drive} from 'dt-types';
 import {Run} from "../runs";
-import {Drive} from "classroom-api"
 
 import {defaultPrepareSubmission, SubjectModule} from '../types/module'
 import {testSubmission} from "codehskarel-tester";

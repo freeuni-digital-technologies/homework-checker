@@ -1,7 +1,6 @@
 import {SubjectModule} from '../types/module'
 
-import {Result, Submission} from "dt-types";
-import {Drive} from "classroom-api"
+import {Result, Submission, Drive} from "dt-types";
 import {Run} from "../runs";
 import {WebTester} from "website-tester"
 import fs from 'fs'
@@ -106,6 +105,7 @@ function findRootFile(dir: string): string {
     // let filesToBe = hw.filesToCheck || ['index']
     let filesToBe = ['index']
     // TODO ასე მგონია find ფუნქცია იარსებებს ჯავასკრიპტში:)
+    // note: keep-trying ქვია გამოყენებულია სხვაგან
     while (filesToBe.some(file => !files.includes(`${file}.html`))) {
         if (tries > 3) {
             throw fileNotFoundError

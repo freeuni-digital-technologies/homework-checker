@@ -1,5 +1,4 @@
-import { Submission, Result } from 'dt-types';
-import { Drive } from 'classroom-api';
+import { Submission, Result, Drive } from 'dt-types';
 import { Run, log } from "../runs";
 import { Partitions } from "../partitions";
 import {  EmailTemplate } from '../templates'

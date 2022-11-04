@@ -1,5 +1,4 @@
-import {Submission} from "dt-types";
-import {downloadError, Drive} from 'classroom-api'
+import {Drive, Submission} from "dt-types";
 import {log, Run} from "./runs";
 
 import path from 'path'
@@ -12,10 +11,11 @@ import {moduleKarel} from './modules/karel'
 import {filesNotFoundError, moduleProject, teamNameNotFoundError} from "./modules/groupProject";
 import fs from "fs";
 import {moduleMarkdown} from "./modules/markdown";
-
+import { downloadError} from "classroom-api";
 // TODO this should be a private member when refactored to class
 // @ts-ignore
 let subjectModule: SubjectModule = null // :|
+
 
 /* Combine all steps into one function */
 export async function getSubmissionsWithResults(hw: HwConfig, run: Run, drive: Drive, saveFile: any, getSubmissions: (a: string, b: string) => Promise<Submission[]>){

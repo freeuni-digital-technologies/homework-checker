@@ -19,11 +19,11 @@ export async function check(hw: HwConfig, runOpts: RunOpts) {
     const run = new Run(hw, runOpts)
     // const auth = new Authenticator(config.CLASSROOM_TOKEN_PATH, config.CLASSROOM_CREDENTIALS_PATH)
     const auth = new Authenticator(hw.dataDir + "/credentials/token.json", hw.dataDir + "/credentials/credentials.json")
-    const googleApi: GoogleApi = await setupGoogleApi(auth, dataConfig.subject, dataConfig.STUDENTS_DATA_PATH)
+    const googleApi: GoogleApi = await setupGoogleApi(auth, dataConfig.subject(), dataConfig.STUDENTS_DATA_PATH)
     const getSubjectSubmissions = (s: string, hw: string) => googleApi.classroom.getSubmissions(hw)
 
 
-    const submissions = await getSubmissionsWithResults(dataConfig.subject, hw, run, googleApi.drive, saveFile, getSubjectSubmissions);
+    const submissions = await getSubmissionsWithResults(hw, run, googleApi.drive, saveFile, getSubjectSubmissions);
 
     const results = await Promise.all(submissions)
     const output = partitionResults(results, hw)

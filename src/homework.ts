@@ -22,6 +22,7 @@ export interface HwConfig {
     deadlineMinutes?: string, //T23:59:00+04:00 if not set 
     exceptions?: Partitions<string[]>,
     manualChecks?: string[],
+    subject?: string,
     force?: string[],
     skip?: string[],
     emailTemplates?: Partitions<EmailTemplate>
@@ -88,19 +89,23 @@ function convertGivenHwConfigToInterface(preHwConfig: any, path: string){
     return rvConfig;
 }
 
-export function readHomeworkConfiguration(configPath: string): HwConfig {
+export function readHomeworkConfiguration(configPath: string, requireTestFile: boolean=true): HwConfig {
     const absolutePath = path.resolve(__dirname, configPath);
     let configFile = null;
     try {
         configFile = require(absolutePath);
     } catch(e) {
-        console.log("Could not find homework configuration file\n" + absolutePath)
-        process.exit(-1);
+        // TODO require-ის დროს სხვა პრობლემებიც შეიძლება იყოს, მაგალითად სინტაქსი არასწორი.
+        // ეს უნდა გადაკეთდეს ისე, რომ ჯერ შემოწმდეს absolutePath არსებობს თუ არა.
+        // თუ არ არსებობს, ამოაგდოს ეს ერორი. ამის შემდეგ იყოს try catch
+        // და try catch-ის ერორში იყოს problem reading configuration file
+        throw Error("Could not find homework configuration file\n" + absolutePath)
     }
     const preHwConfig = configFile;
     checkGivenHwConfigProps(preHwConfig);
-    checkTestFileValidity(path.dirname(absolutePath), preHwConfig.testFileName);
-
+    if (requireTestFile) {
+        checkTestFileValidity(path.dirname(absolutePath), preHwConfig.testFileName);
+    }
     return convertGivenHwConfigToInterface(preHwConfig, absolutePath);
 }
 
@@ -149,6 +154,8 @@ function checkTestFileValidity(absolutePath:string, testFileName:string){
     const testPath = path.join(absolutePath, testFileName);
     if(!fs.existsSync(testPath)){
         printInvalidTestFileNameMessage(testFileName)
-        process.exit(-1)
+        // TODO ეს და სხვა მნიშვნელოვანი ერორები დასაჭერია index.ts-ში
+        // და იქ მოხდეს process.exit
+        throw Error("file not found - " + testPath)
     }
 }

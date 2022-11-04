@@ -9,7 +9,6 @@ describe('reading markdown document', function () {
         return moduleMarkdown.testSubmission(testerPath, markdownPath)
             .then(results => {
                 expect(results[0].passed).eql(false)
-                console.log(results)
                 expect(results[1].passed).eql(true)
             })
     })

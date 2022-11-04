@@ -4,7 +4,7 @@ import {log, Run} from "./runs";
 
 import path from 'path'
 import {HwConfig} from './homework'
-
+import { config } from './config'
 import {Result} from "website-tester" // TODO dt-types
 import {SubjectModule} from './types/module'
 import {fileNotFoundError, moduleWeb, zipFormatError} from './modules/web'
@@ -18,21 +18,16 @@ import {moduleMarkdown} from "./modules/markdown";
 let subjectModule: SubjectModule = null // :|
 
 /* Combine all steps into one function */
-export async function getSubmissionsWithResults(configSubject: string, hw: HwConfig, run: Run, drive: Drive, saveFile: any, getSubmissions: (a: string, b: string) => Promise<Submission[]>){
-    // TODO ეს ფუნქცია კონფიგიდან არ კითხულობს ტესტpath-ს
-    // TODO დასატესტია ასე თუ მუშაობს კარელზე
+export async function getSubmissionsWithResults(hw: HwConfig, run: Run, drive: Drive, saveFile: any, getSubmissions: (a: string, b: string) => Promise<Submission[]>){
     setSubmissionModule(hw)
     const testPath = path.resolve(path.dirname(hw.configPath), hw.testFileName)
     if(!fs.existsSync(testPath)){
         throw new Error("Invalid Test Path")
     }
 
-    if(!fs.existsSync(hw.dataDir + "/subject.json")){
-        throw new Error(`subject.json not found in ${hw.dataDir} directory`);
-    }
+    const subject = hw.subject || config(hw.dataDir!).subject() // TODO config should be read elsewhere
 
-    return await getSubmissions(configSubject, hw.name)
-        // TODO ეს სამი ერთ ფუნქციაში და სტრუქტურა უფრო გამოიკვეთოს
+    return await getSubmissions(subject, hw.name)
         .then(submissions => sliceSubmissions(submissions, run.opts.slice))
         .then(submissions => filterSubmissions(submissions, run, hw))
         .then(submissions => filterSubmissionsByAttachment(submissions))

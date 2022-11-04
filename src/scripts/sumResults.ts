@@ -123,11 +123,11 @@ function addHomeworkResults(results: any, studentNames: string[], homeworksPath:
     fs
         .readdirSync(homeworksPath, {withFileTypes: true})
         .filter(f => f.isDirectory() && !f.name.startsWith('.') && !f.name.includes('group-project'))
-        .filter(f => f.name !== 'hw8') // TODO remove
+        .filter(f => f.name !== 'other-karel-hws')
         .map(dir => dir.name)
         .map(hwName => {
             const hwPath = `${homeworksPath}/${hwName}/config.js`
-            const hw = readHomeworkConfiguration(hwPath)
+            const hw = readHomeworkConfiguration(hwPath, false)
             studentNames.forEach(s => results[s][hw.id] = 0)
             const hwResults = mergeResults(hw, {})
             hwResults

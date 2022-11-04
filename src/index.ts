@@ -20,11 +20,11 @@ export async function check(hw: HwConfig, runOpts: RunOpts) {
 
     // TODO აქ ეს ორი await რაღაც სტრანნადაა და გადასახედია
 
-    const submissions = await getSubmissionsWithResults(dataConfig.subject, hw, run, drive, saveFile, getSubjectSubmissions);
+    const submissions = await getSubmissionsWithResults(hw, run, drive, saveFile, getSubjectSubmissions);
 
     const results = await Promise.all(submissions)
     const output = partitionResults(results, hw)
-    const dueDate = await getDueDate(dataConfig.subject, hw.name, auth)
+    const dueDate = await getDueDate(dataConfig.subject(), hw.name, auth)
     run.saveRunInfo(output, dueDate)
     return output
 }

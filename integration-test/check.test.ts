@@ -3,18 +3,21 @@ import {RunOpts} from "../src/runs";
 import {check} from "../src";
 import {expect} from 'chai';
 import path = require('path');
+import * as fse from "fs-extra";
 
+
+const dataDir = path.resolve(__dirname, '../../integration-test-data/')
 describe('', () => {
     // use it.only when you want to run
     // always replace with it.skip when you commit
-    it.skip('run hw3 test with using main test',  () => {
+    it('run hw3 test with main test',  () => {
         const fakeConfigHw4: HwConfig = {
             id: 'hw3',
             name: 'დავალება 3',
             module: 'karel',
             deadline: '2022-10-28',
-            dataDir: path.resolve(__dirname, '../../../data'),
-            configPath: '../dt-homeworks/hw3/config.js',
+            dataDir: dataDir,
+            configPath: path.join(dataDir, 'hw-configs/hw3/config.js'),
             testFileName: 'hw3tester.js',
             emailTemplates: {}
         };
@@ -27,9 +30,11 @@ describe('', () => {
             slice: 5,
             download: true
         };
+        fse.removeSync(path.join(dataDir, 'output/hw3'))
         return check(fakeConfigHw4, fakeRunOpts)
             .then(output => {
                 expect(output.error).length(0)
+                expect(output.passed).length(2)
             })
             .catch((ex) => {
                 console.log(ex)

@@ -14,6 +14,7 @@
     "integration-test": "ts-mocha integration-test/**/*.test.ts"
   },
   "dependencies": {
+    "@fluffy-spoon/substitute": "^1.208.0",
     "@types/marked": "^4.0.3",
     "argparse": "^1.0.10",
     "classroom-api": "^1.0.2",

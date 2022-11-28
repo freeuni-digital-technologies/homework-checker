@@ -4,6 +4,7 @@ import {check} from "../src";
 import {expect} from 'chai';
 import path = require('path');
 import * as fse from "fs-extra";
+import {moduleKarel} from "../src/modules/karel";
 
 
 const dataDir = path.resolve(__dirname, '../../integration-test-data/')
@@ -31,7 +32,7 @@ describe('', () => {
             download: true
         };
         fse.removeSync(path.join(dataDir, 'output/hw3'))
-        return check(fakeConfigHw4, fakeRunOpts)
+        return check(fakeConfigHw4, fakeRunOpts, moduleKarel)
             .then(output => {
                 expect(output.error).length(0)
                 expect(output.passed).length(2)

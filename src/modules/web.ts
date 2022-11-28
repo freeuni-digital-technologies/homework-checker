@@ -45,7 +45,7 @@ function prepareSubmission(unzipPath: string, testPath: string): string {
 }
 
 
-function downloadAtInterval(submission: Submission, drive: Drive,  index: number, run: Run, saveFile: any): Promise<string> {
+function downloadAtInterval(submission: Submission, index: number, run: Run, drive: Drive): Promise<string> {
     const attachment = submission.attachment!
     const fileName = attachment.title
     const id = attachment.id
@@ -58,7 +58,7 @@ function downloadAtInterval(submission: Submission, drive: Drive,  index: number
         if (run.opts.download) {
             if (process.env.NODE_ENV === 'production')
                 console.log(`${submission.emailId}: downloading`)
-            saveFile(drive, id, path)
+            drive.saveFile(id, path)
                 .then(() => unzipSubmission(submission, path, run.moveDir))
                 .then((unzipDir: string) => resolve(unzipDir))
                 .catch((e: string) => reject(e))

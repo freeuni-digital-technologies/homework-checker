@@ -1,76 +1,65 @@
-import {Drive, Submission} from "dt-types";
+import {GoogleApi, Submission} from "dt-types";
 import {log, Run} from "./runs";
 
 import path from 'path'
 import {HwConfig} from './homework'
-import { config } from './config'
 import {Result} from "website-tester" // TODO dt-types
 import {SubjectModule} from './types/module'
-import {fileNotFoundError, moduleWeb, zipFormatError} from './modules/web'
-import {moduleKarel} from './modules/karel'
-import {filesNotFoundError, moduleProject, teamNameNotFoundError} from "./modules/groupProject";
+import {fileNotFoundError, zipFormatError} from './modules/web'
+import {filesNotFoundError, teamNameNotFoundError} from "./modules/groupProject";
 import fs from "fs";
-import {moduleMarkdown} from "./modules/markdown";
 import { downloadError} from "classroom-api";
-// TODO this should be a private member when refactored to class
-// @ts-ignore
-let subjectModule: SubjectModule = null // :|
 
 
-/* Combine all steps into one function */
-export async function getSubmissionsWithResults(hw: HwConfig, run: Run, drive: Drive, saveFile: any, getSubmissions: (a: string, b: string) => Promise<Submission[]>){
-    setSubmissionModule(hw)
-    const testPath = path.resolve(path.dirname(hw.configPath), hw.testFileName)
-    if(!fs.existsSync(testPath)){
-        throw new Error("Invalid Test Path")
+export class HomeworkChecker {
+    constructor(private api: GoogleApi,
+                private module: SubjectModule,
+                private hw: HwConfig,
+                private run: Run) {
     }
 
-    const subject = hw.subject || config(hw.dataDir!).subject() // TODO config should be read elsewhere
+    async getSubmissionsWithResults(): Promise<Submission[]> {
+        const testPath = path.resolve(path.dirname(this.hw.configPath), this.hw.testFileName)
+        if(!fs.existsSync(testPath)){
+            throw new Error("Invalid Test Path")
+        }
 
-    return await getSubmissions(subject, hw.name)
-        .then(submissions => sliceSubmissions(submissions, run.opts.slice))
-        .then(submissions => filterSubmissions(submissions, run, hw))
-        .then(submissions => filterSubmissionsByAttachment(submissions))
-        .then(logDownloadingSubmissions)
-        .then(submissions => processSubmissions(submissions, testPath, drive, run, saveFile))
-}
-
-const existingModules: any = {
-    'web': moduleWeb,
-    'karel': moduleKarel,
-    'groupProject': moduleProject,
-    'markdown': moduleMarkdown
-}
-
-export function setSubmissionModule(hw: HwConfig) {
-    if (Object.keys(existingModules).includes(hw.module)) {
-        subjectModule = existingModules[hw.module]
-    } else {
-        console.log(`module ${hw.module} not found`)
-        process.exit(1)
+        return await this.api.classroom.getSubmissions(this.hw.name)
+            .then(submissions => sliceSubmissions(submissions, this.run.opts.slice))
+            .then(submissions => filterSubmissions(submissions, this.run, this.hw))
+            .then(submissions => filterSubmissionsByAttachment(submissions))
+            .then(logDownloadingSubmissions)
+            .then(submissions => this.processSubmissions(submissions, testPath))
     }
-}
 
-
-/*
-    Downloads submission and tests it.
-    It finds test file in 'testerPath' path.
-    It also logs if the file has been downloaded or has been tested
-
-    Returns the result for the current submission, if any error occurs, catches it and logs it too
-*/
-async function downloadAndTest(submission: Submission, drive: Drive, index: number, testPath: string,run : Run, saveFile: any): Promise<Submission> {
-    if (!run.forceCheck(submission) && !submission.qualifies()) {
-        return new Promise(r => r(submission))
+    private async processSubmissions(submissions: Submission[], testPath: string): Promise<Submission[]> {
+        if (this.module.asynchronousTest) {
+            return Promise.all(submissions.map((submission, index) => {
+                return this.downloadAndTest(submission, index, testPath)
+            }));
+        }
+        let index = 0
+        const results = []
+        for (let submission of submissions) {
+            const r = await this.downloadAndTest(submission, index, testPath)
+            results.push(r)
+        }
+        return results
     }
-    const id = submission.emailId
-    return subjectModule.downloadAtInterval(submission, drive, index, run, saveFile)
-         .then((e: string) => log(e, `${id}: finished downloading`))
-         .then((newPath: string) => subjectModule.prepareSubmission(newPath, testPath))
-         .then((newPath: string) => subjectModule.testSubmission(testPath, newPath))
-         .then((r: Result[]) => log(r, `${id}: finished testing`))
-         .then((results: Result[]) => submission.addResults(results))
-        .catch((error: any) => logError(submission, error))
+
+    private async downloadAndTest(submission: Submission, index: number, testPath: string): Promise<Submission> {
+        if (!this.run.forceCheck(submission) && !submission.qualifies()) {
+            return new Promise(r => r(submission))
+        }
+        const id = submission.emailId
+        return this.module.downloadAtInterval(submission, index, this.run, this.api.drive)
+            .then((e: string) => log(e, `${id}: finished downloading`))
+            .then((newPath: string) => this.module.prepareSubmission(newPath, testPath))
+            .then((newPath: string) => this.module.testSubmission(testPath, newPath))
+            .then((r: Result[]) => log(r, `${id}: finished testing`))
+            .then((results: Result[]) => submission.addResults(results))
+            .catch((error: any) => logError(submission, error))
+    }
 }
 
 
@@ -100,38 +89,16 @@ function logError(submission: Submission, error: any) {
 }
 
 
-/*
-    DECOMPOSITION SECTION
-
-    src: index.ts -> function main()
-
-    Divided by 4 steps
-    
-*/
-
-
-/*
-    Step 1) 
-        Slicing submissions after getting them from classrom-api module
-*/
 export function sliceSubmissions(submissions: Submission[], slice: number | undefined){
     return slice ? submissions.slice(0,slice) : submissions;
 }
 
-/*
-    Step 2) 
-        Filtering sliced submissions for further operations
-*/
 export function filterSubmissions(submissions: Submission[], run: Run, hw: HwConfig){
     return submissions.filter(
         s => (!hw.skip?.includes(s.emailId) && (run.forceCheck(s) || run.newSubmission(s)))
     );
 }
 
-/*
-    Step 3) 
-        Log submissions after filtering
-*/
 
 export function logDownloadingSubmissions(submissions: Submission[]){
     //log(s, `downloading ${s.filter(e => e.onTime()).length}`h
@@ -150,25 +117,3 @@ function filterSubmissionsByAttachment(submissions: Submission[]): Submission[]{
         return typeof submission.attachment !== 'undefined';
     });
 }
-
-/*
-    Step 4) 
-        Validate submissions with attachments, download and test them
-*/
-
-export async function processSubmissions(submissions: Submission[], testPath: string, drive: Drive, run: Run, saveFile: any): Promise<Submission[]> { 
-    if (subjectModule.asynchronousTest) {
-        return Promise.all(submissions.map((submission, index) => {
-            return downloadAndTest(submission,drive, index, testPath, run, saveFile)
-        }));
-    }
-    let index = 0
-    const results = []
-    for (let submission of submissions) {
-        const r = await downloadAndTest(submission,drive, index, testPath, run, saveFile)
-        results.push(r)
-    }
-    return results
-}
-
-

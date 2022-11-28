@@ -5,25 +5,25 @@ import {Authenticator, setupGoogleApi} from 'classroom-api'
 import {Run, RunOpts} from './runs'
 import {partitionResults} from './partitions'
 
-import {getSubmissionsWithResults} from "./homeworkChecker";
+import {HomeworkChecker} from "./homeworkChecker";
 import {HwConfig} from "./homework";
-import {Drive, GoogleApi} from "dt-types";
+import {GoogleApi} from "dt-types";
+import {moduleWeb} from "./modules/web";
+import {moduleKarel} from "./modules/karel";
+import {moduleProject} from "./modules/groupProject";
+import {moduleMarkdown} from "./modules/markdown";
+import {SubjectModule} from "./types/module";
 
-// დროებით
-function saveFile(drive: Drive, id: string, path: string) {
-    return drive.saveFile(id, path)
-}
 
-export async function check(hw: HwConfig, runOpts: RunOpts) {
+export async function check(hw: HwConfig, runOpts: RunOpts, module: SubjectModule) {
     const dataConfig = config(hw.dataDir || defaults.dataDir)
     const run = new Run(hw, runOpts)
     // const auth = new Authenticator(config.CLASSROOM_TOKEN_PATH, config.CLASSROOM_CREDENTIALS_PATH)
     const auth = new Authenticator(hw.dataDir + "/credentials/token.json", hw.dataDir + "/credentials/credentials.json")
     const googleApi: GoogleApi = await setupGoogleApi(auth, dataConfig.subject(), dataConfig.STUDENTS_DATA_PATH)
-    const getSubjectSubmissions = (s: string, hw: string) => googleApi.classroom.getSubmissions(hw)
+    const homeworkChecker = new HomeworkChecker(googleApi, module, hw, run)
 
-
-    const submissions = await getSubmissionsWithResults(hw, run, googleApi.drive, saveFile, getSubjectSubmissions);
+    const submissions = await homeworkChecker.getSubmissionsWithResults();
 
     const results = await Promise.all(submissions)
     const output = partitionResults(results, hw)
@@ -34,7 +34,23 @@ export async function check(hw: HwConfig, runOpts: RunOpts) {
 
 
 if (require.main == module) {
+
+    const existingModules: any = {
+        'web': moduleWeb,
+        'karel': moduleKarel,
+        'groupProject': moduleProject,
+        'markdown': moduleMarkdown
+    }
+
+
     const  { hw, runOpts } = getArgs()
-    check(hw, runOpts)
-        .then(() => console.log("done."))
+    if (Object.keys(existingModules).includes(hw.module)) {
+        const module: SubjectModule = existingModules[hw.module]
+        check(hw, runOpts, module)
+            .then(() => console.log("done."))
+    } else {
+        console.log(`module ${hw.module} not found`)
+        process.exit(1)
+    }
+
 }

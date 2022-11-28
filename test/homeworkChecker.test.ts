@@ -1,23 +1,16 @@
-import {
-    filterSubmissions,
-    getSubmissionsWithResults,
-    processSubmissions,
-    setSubmissionModule,
-    sliceSubmissions
-} from "../src/homeworkChecker";
-
 import {expect} from "chai";
 import {Run} from "../src/runs";
 
-import {anything, instance, mock, when} from "ts-mockito";
 import {HwConfig} from "../src/homework";
-import {Submission} from "dt-types";
+import {Submission, GoogleApi, Classroom, Drive} from "dt-types";
 import * as path from "path";
-
+import {filterSubmissions, HomeworkChecker, sliceSubmissions} from "../src/homeworkChecker";
+import {Arg, Substitute} from "@fluffy-spoon/substitute";
+import {moduleKarel} from "../src/modules/karel";
 
 const hw: HwConfig = {
     id: "hwx",
-    name: "hwxname",
+    name: "hw1name",
     module: 'karel',
     configPath: '',
     deadline: "2001-01-01",
@@ -25,165 +18,129 @@ const hw: HwConfig = {
 }
 
 
+describe("slicing homeworks",() => {
+    const submissions: any[] = [1, 2, 3]
+
+    it("when slice is undefined, all homeworks should be checked", () => {
+        const slice = undefined;
+        const result = sliceSubmissions(submissions, slice);
+        expect(result).length(3);
+    })
+    it("if a number n is provided for the slice, only first n submissions will be checked", () => {
+        const slice = 1;
+        const result = sliceSubmissions(submissions, slice);
+        expect(result).length(1)
+    })
+    it("if number n is out of range, full array will be returned still", () => {
+        const slice = 5;
+        const result = sliceSubmissions(submissions, slice);
+        expect(result).length(3);
+    })
+
+})
+
+describe("Submission Filtering", () => {
+    it("a submission that is not new will not be checked if not forced", () => {
+        const run = Substitute.for<Run>();
+        const submission: any = { emailId: "emailId1" };
+
+        run.forceCheck(submission).returns(false);
+        run.newSubmission(submission).returns(false);
+
+        expect( filterSubmissions([submission],run,hw)).length(0);
+    })
+
+    it("a submission that is not new will still be checked if not forced", () => {
+        const run = Substitute.for<Run>();
+        const submission: any = { emailId: "emailId1" };
+
+        run.forceCheck(submission).returns(true);
+        run.newSubmission(submission).returns(false);
+
+        expect( filterSubmissions([submission],run,hw)).length(1);
+    })
+
+    it("new submission will not be checked if it is in skipped", () => {
+        const run = Substitute.for<Run>();
+        const submission: any = { emailId: "emailId1" };
+
+        run.forceCheck(submission).returns(false);
+        run.newSubmission(submission).returns(true);
+
+        expect(filterSubmissions([submission],run,hw)).length(1 );
+
+        hw.skip = [submission.emailId];
+
+        expect(filterSubmissions([submission],run,hw)).length(0);
+    })
+})
+
+
 describe("homework checker Tests",() => {
 
-    it("Slice Submissions Functionality Test",(done) => {
-        /* UNDEFINED SLICE */
-        let slice: number | undefined = undefined;
+    it("Test Getting Submissions With Results", async () => {
+        const submissionsAndResultsJS = getSubmissionsAndResults();
 
-        const submissions: any[] = [ 1, 2, 3]
+        const rawSubmissions = submissionsAndResultsJS.submissions
 
-        let result = sliceSubmissions(submissions,slice);
+        const submissions: Submission[] = rawSubmissions.map(e => fromResponse(e));
 
-        expect( 3 == result.length ).to.be.true;
-
-        /* MIDDLE SLICE */
-
-        slice = 1;
-
-        result = sliceSubmissions(submissions,slice);
-
-        expect( 1 == result.length ).to.be.true
-
-
-        /* OUTER SLICE */
-        slice = 5;
-
-        result = sliceSubmissions(submissions,slice);
-
-        expect( 3 == result.length).to.be.true;
-        
-        done();
-    })
-
-    it("Filter Submissions Functionality Test 1",(done) => {
-        let run: Run = mock(Run);
-
-        let submission: any = { emailId: "emailId1" };
-
-        when(run.forceCheck(submission)).thenReturn(false);
-        when(run.newSubmission(submission)).thenReturn(false);
-        
-        let actualInstanceOfRun = instance(run);
-
-
-        expect( 0 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.true;
-        
-        done();
-    })
-
-    it("Filter Submissions Functionality Test 2",(done) => {
-        let run: Run = mock(Run);
-
-        let submission: any = { emailId: "emailId1" };
-
-        when(run.forceCheck(submission)).thenReturn(true);
-        when(run.newSubmission(submission)).thenReturn(false);
-
-        let actualInstanceOfRun = instance(run);
-
-
-        expect(1 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.true;
-
-        hw.skip = [submission];
-
-        expect(0 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.false;
-        
-        done();
-    })
-
-    it("Filter Submissions Functionality Test 3",(done) => {
-        let run: Run = mock(Run);
-
-        let submission: any = { emailId: "emailId1" };
-
-        when(run.forceCheck(submission)).thenReturn(false);
-        when(run.newSubmission(submission)).thenReturn(true);
-
-        hw.skip = []
-        let actualInstanceOfRun = instance(run);
-
-
-        expect(1 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.true;
-        
-        hw.skip = [submission];
-
-        expect(0 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.false;
-
-        done();
-    })
-
-    it("Filter Submissions Functionality Test 4",(done) => {
-        let run: Run = mock(Run);
-
-        let submission: any = { emailId: "emailId1" };
-
-        
-        when(run.forceCheck(submission)).thenReturn(true);
-        when(run.newSubmission(submission)).thenReturn(true);
-
-        let actualInstanceOfRun = instance(run);
-
-        hw.skip = []
-
-        expect(1 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.true;
-        
-        hw.skip = [submission];
-
-        expect(0 == filterSubmissions([submission],actualInstanceOfRun,hw).length ).to.be.false;
-
-        done();
-
-    });
-
-    it("Finish Submissions Test ( False Force Check && Submission Does Not Qualify )", () => {
-        const run: Run = mock(Run);
-
-        when(run.forceCheck(anything())).thenReturn(false);
-        
-        const submissions: any = [
-            {
-                qualifies: () => { return false },
-                attachment: "attach1"
-            },
-            {
-                qualifies: () => { return false },
-                attachment: "attach2"
-            }
-        ];
-        setSubmissionModule({
-            id: '',
-            name: '',
-            module: 'karel',
-            deadline: '',
+        const run = mockRunForFinishSubmissionTest();
+        const hwConfig: HwConfig = {
+            id: "hw2",
+            name: "second homework",
+            deadline: "undefined",
+            module: "karel",
             subject: '_',
-            testFileName: '',
-            configPath: '',
-        })
-        return processSubmissions(submissions,"",null,instance(run),null).then(results => {
-            for(let i=0; i < results.length; i++){
-                expect(results[i].attachment).to.equal(submissions[i].attachment);
+            configPath: '../dt-homeworks/hw2/config.js',
+            testFileName: "hw2tester.js"
+        }
+        const classroom = Substitute.for<Classroom>();
+        const drive = Substitute.for<Drive>();
+        classroom.getSubmissions(Arg.all()).resolves(submissions);
+        drive.saveFile(Arg.all()).resolves('');
+        const api:GoogleApi = {
+            classroom: classroom,
+            drive: drive
+        }
+        const module = {...moduleKarel}
+        module.downloadAtInterval =  (submission, __, run,____ ) => {
+                return Promise.resolve(`${run.moveDir}/${submission.attachment.title}`)
+        }
+        const homeworkChecker = new HomeworkChecker(api, module, hwConfig, run);
+        const results: Submission[] = await homeworkChecker.getSubmissionsWithResults();
+
+        results.forEach(submission => {
+            const testResults: any[] = submission.results;
+
+            if(testResults[0].error){
+                const foundError = findResultInSamples(submissionsAndResultsJS, "error",submission.id);
+                expect(foundError).to.not.be.undefined;
+                return;
             }
+
+            const passed: boolean = testResults.every(testResult => testResult.passed);
+            if(passed){
+                const foundPassed = findResultInSamples(submissionsAndResultsJS, "passed",submission.id);
+                expect(foundPassed).to.not.be.undefined;
+            } else {
+                const foundNotPassed = findResultInSamples(submissionsAndResultsJS, "failed",submission.id);
+                expect(foundNotPassed).to.not.be.undefined;
+            }
+
         })
     })
 
     function mockRunForFinishSubmissionTest(){
-        const run: Run = mock(Run);
-        when(run.forceCheck(anything())).thenReturn(true);
+        const run = Substitute.for<Run>();
+        const submission: any = { emailId: "emailId1" };
 
-        let runInstance: Run = instance(run);
-        runInstance.moveDir = path.resolve(__dirname,"./files/integrationTest/submissionFiles")
-        runInstance.opts = { download: true, omit: null }
+        run.forceCheck(submission.emailId).returns(false);
 
-        return runInstance;
-    }
+        run.moveDir.returns(path.resolve(__dirname,"./files/integrationTest/submissionFiles"))
+        run.opts.returns({ download: true, omit: null });
 
-    function createFakeSaveFileFunction(){
-        return function(first,second,third){
-            return new Promise((resolve,reject) => {
-                resolve("");
-            });
-        }
+        return run;
     }
 
     function getSubmissionsAndResults(){
@@ -194,75 +151,6 @@ describe("homework checker Tests",() => {
         return submissionsAndResultsJS.results[identifier].find(result => result.id == id);
     }
 
-    async function getTestResultsForSubmissions(submissions){
-
-        let runInstance = mockRunForFinishSubmissionTest();
-
-        const fakeSaveFile = createFakeSaveFileFunction();
-
-        const results: Submission[] = await Promise.all(submissions.map((submission) => {
-            const hwId: string = submission.hwId;
-            const testPath = path.resolve(__dirname,`../resources/hw2tester.js`);
-            const sbmssn: Submission = fromResponse(submission);
-            
-            return processSubmissions([sbmssn],testPath,null,runInstance,fakeSaveFile)
-                .then(s => s[0])
-        }))
-        return results;
-    }
-
-
-    function createFakeGetSubmissionsFunction(returnSubmissions: Submission[]){
-        return function(a: string, b: string){
-            return Promise.all(returnSubmissions);
-        }
-    }
-
-    it("Test Getting Submissions With Results",async () => {
-        const submissionsAndResultsJS = getSubmissionsAndResults();
-
-        const rawSubmissions = submissionsAndResultsJS.submissions
-
-        const submissions: Submission[] = rawSubmissions.map(e => fromResponse(e));
-
-        const fakeGetSubmissions = createFakeGetSubmissionsFunction(submissions);
-        const fakeSaveFile = createFakeSaveFileFunction();
-        const runInstance = mockRunForFinishSubmissionTest();
-        const fakeHwConfig: HwConfig = {
-            id: "hw2",
-            name: "second homework",
-            deadline: "undefined",
-            module: "karel",
-            subject: '_',
-            configPath: '../dt-homeworks/hw2/config.js',
-            testFileName: "hw2tester.js"
-        }
-        setSubmissionModule(fakeHwConfig)
-        const resultsPromise = await getSubmissionsWithResults(fakeHwConfig,runInstance, null, fakeSaveFile, fakeGetSubmissions);
-
-        const results = await Promise.all(resultsPromise);
-
-        results.forEach(result => {
-            let testResults: any[] = result.results;
-
-            if(testResults[0].error){
-                let foundError = findResultInSamples(submissionsAndResultsJS, "error",result.id);
-                expect(foundError).to.not.be.undefined;
-                return;
-            }
-
-            let passed: boolean = testResults.every(testResult => testResult.passed);
-            if(passed){
-                let foundPassed = findResultInSamples(submissionsAndResultsJS, "passed",result.id);
-                expect(foundPassed).to.not.be.undefined;
-            } else {
-                let foundNotPassed = findResultInSamples(submissionsAndResultsJS, "failed",result.id);
-                expect(foundNotPassed).to.not.be.undefined;
-            }
-            
-        })
-
-    })
 })
 
 

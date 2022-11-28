@@ -4,7 +4,7 @@ import {Run} from "../runs";
 import {defaultPrepareSubmission, SubjectModule} from '../types/module'
 import {testSubmission} from "codehskarel-tester";
 
-export function downloadAtInterval(submission: Submission, drive: Drive,  index: number, run: Run, saveFile: any): Promise<string> {
+export function downloadAtInterval(submission: Submission, index: number, run: Run, drive: Drive): Promise<string> {
     const attachment = submission.attachment!
     const fileName = attachment.title
     const id = attachment.id
@@ -14,7 +14,7 @@ export function downloadAtInterval(submission: Submission, drive: Drive,  index:
             if (run.opts.download) {
                 if (process.env.NODE_ENV === 'production')
                     console.log(`${submission.emailId}: downloading`)
-                saveFile(drive, id, path)
+                drive.saveFile(id, path)
                     .then(() => resolve(path))
                     .catch((err: any) => reject(err))
             } else {

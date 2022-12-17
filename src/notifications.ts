@@ -12,6 +12,7 @@ import { SubjectModule } from './types/module'
 
 function notifyLastRun() {
     const { hw, runOpts } = getArgs()
+    runOpts.logOutput = true
     const run = new Run(hw, runOpts)
     const results = run.previousRunInfo
     const categoriesToNotify: Partitions<boolean> | any = {

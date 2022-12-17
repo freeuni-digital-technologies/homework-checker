@@ -30,7 +30,7 @@ export type EmailTemplate = (s: S) => string
 
 export const templates: Partitions<EmailTemplate> = {
     late: (s: S) => `
-        ${summaries.greeting(s)},
+        ${summaries.greeting(s)}
 
         დავალება დაგვიანებით ატვირთე და ქულა არ ჩაგეთვლება, მაგრამ უკუკავშირის მიზნით გიგზავნი შედეგს:
 
@@ -41,7 +41,7 @@ export const templates: Partitions<EmailTemplate> = {
         ${fileInfo(s)}
     `,
     invalid: (s: S) => `
-        ${summaries.greeting(s)},
+        ${summaries.greeting(s)}
 
         ${summaries.invalid(s)}
 
@@ -52,7 +52,7 @@ export const templates: Partitions<EmailTemplate> = {
 
     // error/invalid მესიჯები უნდა იყოს ერთგან გაწერილი და ყველას თავისი მესიჯი/გამოსწორება ეწეროს
     error: (s: S) => `
-        ${summaries.greeting(s)},
+        ${summaries.greeting(s)}
         
         <div>
         ${summaries.error(s)}
@@ -87,7 +87,7 @@ export const templates: Partitions<EmailTemplate> = {
             რომ სწორი ფაილი ატვირთე? გადმოწერე შენი ატვირთული ფაილი თავიდან და ნახე რა კოდი წერია. </p>`
         const message = grade < maxGrade/3 ? nonePassingMessage : partiallyPassingMessage
         return `
-        ${summaries.greeting(s)},
+        ${summaries.greeting(s)}
         
         ${message}
         
@@ -98,7 +98,7 @@ export const templates: Partitions<EmailTemplate> = {
         ${fileInfo(s)}
     `},
     passed: (s: S) => `
-        ${summaries.greeting(s)},
+        ${summaries.greeting(s)}
 
 	   <p>დავალება ჩაბარებულია 🥳 </p>
 
@@ -110,7 +110,7 @@ export const templates: Partitions<EmailTemplate> = {
 
 export const summaries = {
     greeting: (s: S) => {
-    return `<p>გამარჯობა ${s.georgianName}</p>`
+    return `<p>გამარჯობა ${s.georgianName},</p>`
     },
 
     error: (s: S) => {

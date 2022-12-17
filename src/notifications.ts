@@ -50,19 +50,19 @@ export function notify(
             if (runOpts.omit && runOpts.omit.includes(type)) {
                 return submissionsWithValidEmail.filter(s => hw.force?.includes(s.emailId))
                     .map(addToString)
-                    .map(s => getEmail(s, template(s), subject))
+                    .map(s => getEmail(s, template(s), subject, type))
             } else if (categoriesToNotify[type]) {
                 return submissionsWithValidEmail
                     .map(addToString)
-                    .map(s => getEmail(s, template(s), subject))
+                    .map(s => getEmail(s, template(s), subject, type))
             } else {
                 return []
             }
         })
         .flat()
     const failedEmail = runOpts.continue + '@freeuni.edu.ge'
-    const continuefrom = runOpts.continue ? emails.map(e => e.to).indexOf(failedEmail) : 0
-    const emailsToSend = emails.slice(continuefrom, emails.length)
+    const continueFrom = runOpts.continue ? emails.map(e => e.to).indexOf(failedEmail) : 0
+    const emailsToSend = emails.slice(continueFrom, emails.length)
     if (runOpts.trial) {
         if (runOpts.logOutput) {
             console.log(emailsToSend)
@@ -88,13 +88,18 @@ function validEmail(s: Submission) {
 
 function getEmail(s: Submission, 
     body: string, 
-    subject: string ) {
+    subject: string,
+  type:string) {
      if(validEmail(s)){
-         return {
-              to: s.emailAddress,
-              subject: subject,
-              text: body
+         const email: any = {
+             to: s.emailAddress,
+             subject: subject,
+             text: body
          }
+         if (type !== 'passed') {
+             email.replyTo = `i.mghvdliashvili@freeuni.edu.ge,lnadi17@freeuni.edu.ge,agurg21@freeuni.edu.ge`
+         }
+         return email
      } else {
          return {
               to: s.emailAddress,
@@ -103,6 +108,7 @@ function getEmail(s: Submission,
          }
      }
 }
+
 function addToString(submission: Submission) {
     submission.results.toString = () => JSON.stringify(
         submission.results)

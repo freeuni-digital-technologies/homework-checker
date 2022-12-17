@@ -1,6 +1,9 @@
 import { Partitions } from "./partitions";
 import { Submission } from 'dt-types';
 
+
+const maxGrade = 3
+
 export type S = Submission
 const urls = {
 	homework: 'https://freeuni-digital-technologies.github.io/homework/',
@@ -54,6 +57,7 @@ export const templates: Partitions<EmailTemplate> = {
         <div>
         ${summaries.error(s)}
         </div>
+        
         <p>ია</p>
         
         ${fileInfo(s)}
@@ -64,21 +68,30 @@ export const templates: Partitions<EmailTemplate> = {
         const failed = s.results.filter(r => !r.passed)
         const passed = s.results.filter(r => r.passed)
         const testCount = s.results.length
-        const grade = passed.length/testCount*4
+        const grade = passed.length/testCount
+        const partiallyPassingMessage = `
+             <p>
+            შენი დავალება მიღებულია და გადის ${passed.length} ტესტს ${testCount}-დან. 
+        ქულა იქნება ${grade} ${maxGrade}-დან. 
+            <p>
+            ქვემოთ დავურთავ, რომელი ტესტები ვერ გაიარა შენმა კოდმა. დედლაინამდე თუ დრო გექნება, შეგიძლია ეს ნაწილებიც გამოასწორო. 
+            </p>
+            <p>
+            ${failed.map(t => t.message).join('</p><p>')}
+            </p>
+        </p>
+        
+        `
+        const nonePassingMessage = `<p>შენმა დავალებამ შესწორებისას ტესტების ნახევარზე მეტი ვერ გაიარა (ქულა
+            არის ${grade} ${maxGrade}-დან. დარწმუნებული ხარ, 
+            რომ სწორი ფაილი ატვირთე? გადმოწერე შენი ატვირთული ფაილი თავიდან და ნახე რა კოდი წერია. </p>`
+        const message = grade < maxGrade/3 ? nonePassingMessage : partiallyPassingMessage
         return `
         ${summaries.greeting(s)},
         
-        <p>
-        შენი დავალება მიღებულია და გადის ${passed.length} ტესტს ${testCount}-დან. 
-        ქულა იქნება ${grade} 4-დან. 
-        </p>
-        <p>
-        ქვემოთ დავურთავ, რომელი ტესტები ვერ გაიარა შენმა კოდმა. დედლაინამდე თუ დრო გექნება, შეგიძლია ეს ნაწილებიც გამოასწორო. 
-თუ თვლი რომ რამე არასწორია, უპასუხე ამ მეილს, ოღონდ cc-ში დაამატე გიგი. 
-        </p>
-        <p>
-        ${failed.map(t => t.message).join('</p><p>')}
-        </p>
+        ${message}
+        
+        ${summaries.help}
         
         <p>ია</p>
         
@@ -112,6 +125,8 @@ export const summaries = {
             ${s.results}
 
             ${blocked}
+            
+            ${summaries.help}
         `
     },
 
@@ -124,9 +139,14 @@ export const summaries = {
             დაზიპვა თუ არ იცი, ინსტრუქცია ამ გვერდზეა: ${urls.web_homework}.
 
             ${s.results.map(r => `<p>${r.details}</p>`)}
+            
+            ${summaries.help}
     `
+    },
 
-    }
+    help: (s: S) => `
+            <p>თუ ჩემს მოწერილ ინფორმაციაში რამე არასწორია ან ინსტრუქციაში დახმარება გჭირდება, უპასუხე ამ მეილს.</p>
+    `
 
 }
 

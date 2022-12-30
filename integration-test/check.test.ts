@@ -2,15 +2,14 @@ import {HwConfig} from "../src/homework";
 import {RunOpts} from "../src/runs";
 import {check} from "../src";
 import {expect} from 'chai';
-import path = require('path');
+import * as path from 'path'
 import * as fse from "fs-extra";
 import {moduleKarel} from "../src/modules/karel";
+import { dataDir, setupHooks } from './hooks';
 
+setupHooks()
 
-const dataDir = path.resolve(__dirname, '../../integration-test-data/')
 describe('', () => {
-    // use it.only when you want to run
-    // always replace with it.skip when you commit
     it('run hw3 test with main test',  () => {
         const fakeConfigHw4: HwConfig = {
             id: 'hw3',

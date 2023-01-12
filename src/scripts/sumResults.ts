@@ -2,16 +2,12 @@ import fs from 'fs'
 import path from 'path'
 import {readHomeworkConfiguration} from '../homework'
 import {mergeResults} from '../partitions'
-import {logProjectResults, projectFilesPath, ProjectResult, projectsPath} from "./sumProjectResults";
+import {logProjectResults, ProjectResult } from "./sumProjectResults";
 import {ProjectsInfo} from "../types/projectsInfo";
 import fse from "fs-extra";
-import {defaults} from "../config";
+import {defaultPaths} from "../config";
+import * as config from '../config'
 
-const defaultHwPath = defaults.hwConfigPath
-const defaultEmisPath = path.join(defaults.dataDir, '/emis.csv')
-const defaultManualResultsPath = path.join(defaults.dataDir, '/manualResults')
-
-const defaultScore = 4
 const invalidEntries: any[] = []
 
 /**
@@ -19,17 +15,17 @@ const invalidEntries: any[] = []
  * დაამატებს/გადაწერს ხელით შეყვანილ ქულებს csv ფაილებში
  */
 export function summarizeResults(
-    emisFileName: string = defaultEmisPath,
-    manualResultsPath: string = defaultManualResultsPath,
-    homeworksPath: string = defaultHwPath) {
+    emisFileName: string = defaultPaths.emis,
+    manualResultsPath: string = defaultPaths.manualResults,
+    homeworksPath: string = defaultPaths.hwConfig) {
     const studentNames = readStudentList(emisFileName)
     const results: any = {}
     studentNames.forEach(s => results[s] = {sum: 0})
     addHomeworkResults(results, studentNames, homeworksPath)
     try {
-        const projectResults = JSON.parse(fse.readFileSync(defaults.projectsPath, 'utf-8'))
+        const projectResults = JSON.parse(fse.readFileSync(defaultPaths.project.info, 'utf-8'))
             .map((e: any) => new ProjectResult(e))
-        const pi = new ProjectsInfo(projectsPath + '/projects.json', projectFilesPath)
+        const pi = new ProjectsInfo(defaultPaths.project.info, defaultPaths.project.files)
         logProjectResults(projectResults, pi)
     } catch {}
     addManualResults(results, studentNames, manualResultsPath)
@@ -45,6 +41,9 @@ export function summarizeResults(
 }
 
 function addManualResults(results: any, studentNames: String[], manualResultsPath: string) {
+    if (!fs.existsSync(manualResultsPath)) {
+        return
+    }
     fs
         .readdirSync(manualResultsPath)
         .filter(f => f.includes('.csv'))
@@ -89,7 +88,7 @@ function readCsv(manualResultsPath: string, resultsFile: string) {
 }
 
 function addQuizCsvResults(results: any, studentNames: String[], manualResultsPath: string, resultsFile: string) {
-    const quizId = resultsFile.split('quiz ')[1].split('-')[0]
+    const quizId = resultsFile.split('quiz')[1].split('-')[0]
     const name = 'quiz' + quizId
     // @ts-ignore
     studentNames.forEach(n => results[n][name] = 0)
@@ -143,9 +142,9 @@ function addHomeworkResults(results: any, studentNames: string[], homeworksPath:
                 .filter(r => studentNames.includes(r.emailId))
                 .forEach(r => {
                     if (r.status == 'passed') {
-                        results[r.emailId][hw.id] = defaultScore
+                        results[r.emailId][hw.id] = config.defaultScore
                     } else if (r.status == 'failed') {
-                        const score = r.results.filter(t => t.passed).length / r.results.length * defaultScore
+                        const score = r.results.filter(t => t.passed).length / r.results.length * config.defaultScore
                         results[r.emailId][hw.id] = Number(score.toFixed(2))
                     } else {
                         results[r.emailId][hw.id] = 0
@@ -168,7 +167,7 @@ function readStudentList(emisFileName: string) {
  */
 
 export function convertToCsv(resultsList: any) {
-    let studentNames = readStudentList(defaultEmisPath)
+    let studentNames = readStudentList(defaultPaths.emis)
     let hwList = Object.keys(resultsList[studentNames[0]]).join(',')
     let csv = `emailId,` + hwList + '\n'
     csv += studentNames.map(emailId => {

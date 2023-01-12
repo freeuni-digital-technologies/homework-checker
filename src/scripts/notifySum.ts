@@ -1,10 +1,8 @@
 import {sendEmails} from "classroom-api";
-import {convertToCsv, summarizeResults} from "./sumResults";
+import {summarizeResults} from "./sumResults";
 import {summaries} from "../templates";
 import { ArgumentParser } from 'argparse'
-import fs from "fs";
-import path from "path";
-import {defaults} from "../config";
+
 
 function notifyEmails() {
     const parser = new ArgumentParser({
@@ -19,7 +17,6 @@ function notifyEmails() {
     } else {
         sendEmails(emails, 2000)
     }
-    return results
 }
 
 function getEmails(results: any) {
@@ -63,9 +60,7 @@ ${Object.keys(scores)
 
 
 if (require.main == module) {
-    const results = convertToCsv(notifyEmails())
-    fs.writeFileSync(path.resolve(process.cwd(), '../results.csv'), results)
-    fs.writeFileSync(path.join(defaults.dataDir + '/results.csv'), results)
+    notifyEmails()
 }
 
 

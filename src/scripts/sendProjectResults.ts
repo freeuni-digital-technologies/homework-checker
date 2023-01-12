@@ -7,23 +7,23 @@ import {ProjectGroup} from "../modules/groupProject";
 import {
     ProjectResult,
     logProjectResults,
-    projectsPath,
-    projectFilesPath,
     flattenProjectResults
 } from './sumProjectResults';
+import {defaultPaths} from "../config";
 
 
-
-function notifyResults() {
+function notifyResults(projectScoresPath = defaultPaths.project.scores,
+                       projectsInfoPath = defaultPaths.project.info,
+                       projectFilesPath = defaultPaths.project.files) {
     const parser = new ArgumentParser({
         addHelp: true
     })
     parser.addArgument(['-t', '--trial'], {help: 'dont save output/print emails not send'})
     parser.addArgument(['-c', '--continue'], {help: 'continue from email id'})
     const args = parser.parseArgs()
-    const results = JSON.parse(fse.readFileSync('/Users/ia/dev/data/manualResults/project_scores.json', 'utf-8'))
+    const results = JSON.parse(fse.readFileSync(projectScoresPath, 'utf-8'))
         .map((e: any) => new ProjectResult(e))
-    const pi = new ProjectsInfo(projectsPath + '/projects.json', projectFilesPath)
+    const pi = new ProjectsInfo(projectsInfoPath, projectFilesPath)
     logProjectResults(results, pi)
     const summaries = summarizeResults()
     const emails = getEmails(results, pi, summaries)

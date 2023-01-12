@@ -1,4 +1,4 @@
-import {config, defaults} from './config'
+import {config, defaultPaths} from './config'
 import {getArgs} from './cli'
 
 import {Authenticator, setupGoogleApi} from 'classroom-api'
@@ -16,19 +16,18 @@ import {SubjectModule} from "./types/module";
 
 
 export async function check(hw: HwConfig, runOpts: RunOpts, module: SubjectModule) {
-    const dataConfig = config(hw.dataDir || defaults.dataDir)
+    const dataConfig = config(hw.dataDir || defaultPaths.data)
     const run = new Run(hw, runOpts)
-    // const auth = new Authenticator(config.CLASSROOM_TOKEN_PATH, config.CLASSROOM_CREDENTIALS_PATH)
-    const auth = new Authenticator(hw.dataDir + "/credentials/token.json", hw.dataDir + "/credentials/credentials.json")
-    const googleApi: GoogleApi = await setupGoogleApi(auth, dataConfig.subject(), dataConfig.STUDENTS_DATA_PATH)
+    const auth = new Authenticator(dataConfig.paths.classroom.token, dataConfig.paths.classroom.credentials)
+    const googleApi: GoogleApi = await setupGoogleApi(auth, dataConfig.subject(), dataConfig.paths.studentList)
     const homeworkChecker = new HomeworkChecker(googleApi, module, hw, run)
 
     const submissions = await homeworkChecker.getSubmissionsWithResults();
 
     const results = await Promise.all(submissions)
     const output = partitionResults(results, hw)
-    const dueDate = await googleApi.classroom.getDueDate(hw.name)
-    run.saveRunInfo(output, dueDate)
+    // const dueDate = await googleApi.classroom.getDueDate(hw.name)
+    run.saveRunInfo(output)
     return output
 }
 

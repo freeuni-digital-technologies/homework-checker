@@ -2,11 +2,11 @@ import { Partitions } from './partitions'
 import fs from "fs";
 import path from 'path'
 import { EmailTemplate } from './templates';
-import {defaults} from "./config";
+import {defaultPaths, defaultHwConfigFileName} from "./config";
 
 
 export function defaultHomeworkPath(hwId: string) {
-    return path.join(defaults.hwConfigPath, hwId, defaults.configFileName)
+    return path.join(defaultPaths.hwConfig, hwId, defaultHwConfigFileName)
 }
 
 // TODO არასავალდებულო პარამეტრები არ სწორდება ასეთი ლოგიკით
@@ -81,7 +81,7 @@ function convertGivenHwConfigToInterface(preHwConfig: any, path: string){
         name: preHwConfig.classroomName,
         module: preHwConfig.module,
         deadline: preHwConfig.deadline,
-        dataDir: preHwConfig.data_dir || defaults.dataDir,
+        dataDir: preHwConfig.data_dir || defaultPaths.data,
         configPath: path,
         testFileName: preHwConfig.testFileName,
         emailTemplates: preHwConfig.emailTemplates
@@ -113,20 +113,20 @@ export function readHomeworkConfiguration(configPath: string, requireTestFile: b
 
 /*
     Reads the default path of homework configurations.
-    Name of the subfolders does not matter.
+    Name of the directoryListings does not matter.
 
     Default structure:
-        Root Folder of Homework Configuration -> Subfolder for each homework configuration -> Homework Configuration File
+        Root Folder of Homework Configuration -> directoryListing for each homework configuration -> Homework Configuration File
 */
 function getConfigsOfCurrentHomeworks(): HwConfig[] {
     let homeworks: HwConfig[] = [];
 
-    fs.readdirSync(defaults.hwConfigPath).forEach(subfolder => {
+    fs.readdirSync(defaultPaths.hwConfig).forEach(directoryListing => {
 
-        if(subfolder == "README.md" || subfolder == ".git")
+        if(directoryListing == "README.md" || directoryListing == ".git")
             return;
 
-        let currentConfigPath: string = defaultHomeworkPath(subfolder);
+        let currentConfigPath: string = defaultHomeworkPath(directoryListing);
         let currentHomeworkConfig: HwConfig = readHomeworkConfiguration(currentConfigPath);
         homeworks.push(currentHomeworkConfig);
     })

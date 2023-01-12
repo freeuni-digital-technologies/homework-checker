@@ -1,8 +1,4 @@
 import {ProjectsInfo} from "../types/projectsInfo";
-import fse from "fs-extra";
-
-export const projectsPath = "/Users/ia/dev/data"
-export const projectFilesPath = projectsPath + '/files'
 
 
 export function logProjectResults(results: ProjectResult[], pi: ProjectsInfo) {
@@ -11,8 +7,7 @@ export function logProjectResults(results: ProjectResult[], pi: ProjectsInfo) {
             const { result, emailId } = e
             return `${emailId},${result.sum()}`
         }).join('\n')
-
-    fse.writeFileSync("/Users/ia/dev/data/manualResults/project.csv", projectScores)
+    console.log(projectScores)
 }
 
 

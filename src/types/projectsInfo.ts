@@ -54,8 +54,7 @@ export class ProjectsInfo {
             existingProject.members.push(emailId)
         }
         const destination = existingProject.dir
-        // @ts-ignore
-        fse.rmSync(destination, {recursive: true})
+        fse.removeSync(destination)
         fse.copySync(dir, destination)
         this.save()
         return existingProject.dir

@@ -48,8 +48,10 @@ function addManualResults(results: any, studentNames: String[], manualResultsPat
         .readdirSync(manualResultsPath)
         .filter(f => f.includes('.csv'))
         .forEach(f => {
-            if (f.includes("quiz") && !f.includes('users')) {
-                addQuizCsvResults(results, studentNames, manualResultsPath, f)
+            if (f.includes("quiz")) {
+                if (!f.includes('users')) {
+                    addQuizCsvResults(results, studentNames, manualResultsPath, f)
+                }
             } else {
                 addSimpleCsvResults(results, studentNames, manualResultsPath, f)
             }

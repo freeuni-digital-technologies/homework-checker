@@ -106,10 +106,7 @@ export function logDownloadingSubmissions(submissions: Submission[]){
         console.log("no new submissions")
         process.exit(0)
     }
-    const text = submissions.filter(submission => {
-        return submission.onTime();
-    }).length
-    return log(submissions,`downloading ${text}`);
+    return log(submissions,`downloading ${submissions.length}`);
 }
 
 function filterSubmissionsByAttachment(submissions: Submission[]): Submission[]{

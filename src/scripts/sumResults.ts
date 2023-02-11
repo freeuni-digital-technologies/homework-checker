@@ -24,10 +24,7 @@ export function summarizeResults(
     studentNames.forEach(s => results[s] = {sum: 0})
     addHomeworkResults(results, studentNames, homeworksPath)
     try {
-        const projectResults = JSON.parse(fse.readFileSync(defaultPaths.project.scores, 'utf-8'))
-            .map((e: any) => new ProjectResult(e))
-        const pi = new ProjectsInfo(defaultPaths.project.info, defaultPaths.project.files)
-        addProjectResults(results, projectResults, pi)
+        addProjectResults(results)
     } catch {}
     addManualResults(results, studentNames, manualResultsPath)
     studentNames.forEach(emailId => {
@@ -185,7 +182,10 @@ export function convertToCsv(resultsList: any) {
     return csv
 }
 
-function addProjectResults(results: any, projectResults: ProjectResult[], pi: ProjectsInfo) {
+function addProjectResults(results: any) {
+    const projectResults = JSON.parse(fse.readFileSync(defaultPaths.project.scores, 'utf-8'))
+        .map((e: any) => new ProjectResult(e))
+    const pi = new ProjectsInfo(defaultPaths.project.info, defaultPaths.project.files)
    flattenProjectResults(projectResults, pi)
         .map(e => {
             const { result, emailId } = e

@@ -21,7 +21,7 @@ export function summarizeResults(
     homeworksPath: string = defaultPaths.hwConfig) {
     const studentNames = readStudentList(emisFileName)
     const results: any = {}
-    studentNames.forEach(s => results[s] = {sum: 0})
+    studentNames.forEach(s => results[s] = {before_exam: 0, total: 0})
     addHomeworkResults(results, studentNames, homeworksPath)
     try {
         addProjectResults(results)
@@ -31,7 +31,7 @@ export function summarizeResults(
         const studentResults = results[emailId]
         // @ts-ignore
         const sum: number = Object.values(studentResults).reduce((a: number, b: number) => a + b, 0)
-        studentResults.sum = Number(sum.toFixed(2))
+        studentResults.before_exam = Number(sum.toFixed(2))
     })
     // add bonuses here
 

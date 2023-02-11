@@ -7,6 +7,7 @@ import {ProjectsInfo} from "../types/projectsInfo";
 import fse from "fs-extra";
 import {defaultPaths} from "../config";
 import * as config from '../config'
+import {Result} from "website-tester";
 
 const invalidEntries: any[] = []
 
@@ -146,7 +147,7 @@ function addHomeworkResults(results: any, studentNames: string[], homeworksPath:
                     if (r.status == 'passed') {
                         results[r.emailId][hw.id] = config.defaultScore
                     } else if (r.status == 'failed') {
-                        const score = r.results.filter(t => t.passed).length / r.results.length * config.defaultScore
+                        const score = r.classroomGrade || r.results.filter((t: Result) => t.passed).length / r.results.length * config.defaultScore
                         results[r.emailId][hw.id] = Number(score.toFixed(2))
                     } else {
                         results[r.emailId][hw.id] = 0

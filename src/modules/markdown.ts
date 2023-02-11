@@ -7,7 +7,7 @@ import {parse} from 'node-html-parser'
 
 function testSubmission(testPath: string, path: string): Promise<Result[]> {
     const { assertions } = require(testPath)
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _) => {
         const contents = fse.readFileSync(path, 'utf-8')
         const html_string = marked.parse(contents)
         const document = parse(html_string)
@@ -19,9 +19,15 @@ function testSubmission(testPath: string, path: string): Promise<Result[]> {
                     message: res.message
                 }
             } catch(err) {
+                if (err instanceof Error) {
+                    return {
+                        passed: false,
+                        message: err.message
+                    }
+                }
                 return {
                     passed: false,
-                    message: err.message
+                    message: 'unknown error'
                 }
             }
        })

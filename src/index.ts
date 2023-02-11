@@ -12,6 +12,7 @@ import {moduleWeb} from "./modules/web";
 import {moduleKarel} from "./modules/karel";
 import {moduleProject} from "./modules/groupProject";
 import {moduleMarkdown} from "./modules/markdown";
+import {moduleGradesOnly} from "./modules/gradeOnly"
 import {SubjectModule} from "./types/module";
 
 
@@ -38,7 +39,8 @@ if (require.main == module) {
         'web': moduleWeb,
         'karel': moduleKarel,
         'groupProject': moduleProject,
-        'markdown': moduleMarkdown
+        'markdown': moduleMarkdown,
+        'grades-only': moduleGradesOnly
     }
 
 

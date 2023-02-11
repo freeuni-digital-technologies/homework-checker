@@ -46,7 +46,7 @@ export function notify(
         .map(([type, submissions]: [string, Submission[]]) => {
             const submissionsWithValidEmail = submissions.filter(validEmail)
             // @ts-ignore
-            const template = hw.emailTemplates[type] || emailTemplates[type] || templates[type]
+            const template = hw.emailTemplates? hw.emailTemplates[type] : (emailTemplates[type] || templates[type])
             if (runOpts.omit && runOpts.omit.includes(type)) {
                 return submissionsWithValidEmail.filter(s => hw.force?.includes(s.emailId))
                     .map(addToString)
@@ -110,10 +110,9 @@ function getEmail(s: Submission,
 }
 
 function addToString(submission: Submission) {
-    submission.results.toString = () => JSON.stringify(
-        submission.results)
-        .replace(/},/g, '\n\n')
-        .replace(/[{}"\[\]]/g, '')
+    submission.results.toString = () => JSON.stringify(submission.results)
+        .replaceAll(/},/g, '\n\n')
+        .replaceAll(/[{}"\[\]]/g, '')
     return submission
 }
 

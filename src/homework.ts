@@ -28,13 +28,16 @@ export interface HwConfig {
     emailTemplates?: Partitions<EmailTemplate>
 }
 
-class HwConfigProp {
+class HwConfigMandatoryProp {
     public id: string = "";
     public classroomName: string = "";
-    public deadline: string = "";
-    public testFileName: string = "";
-    public emailTemplates?: object;
     public module: string = "";
+}
+
+class HwConfigProp extends HwConfigMandatoryProp {
+    public deadline?: string = "";
+    public testFileName?: string = "";
+    public emailTemplates?: object;
 }
 
 /* Message Constructors */
@@ -57,10 +60,9 @@ function checkGivenHwConfigProps(preHwConfig: any) {
         process.exit(-1);
     }
 
-    const tempConfProp: HwConfigProp = new HwConfigProp();
+    const tempConfProp: HwConfigMandatoryProp = new HwConfigMandatoryProp();
     for(const i of Object.getOwnPropertyNames(tempConfProp)) {
         let desc: PropertyDescriptor | undefined = Object.getOwnPropertyDescriptor(tempConfProp, i);
-
         if(!preHwConfig.hasOwnProperty(i) && typeof desc?.value !== undefined){
             printPropertyDoesNotExistMessage(i);
             process.exit(-1);
@@ -101,9 +103,9 @@ export function readHomeworkConfiguration(configPath: string, requireTestFile: b
         // და try catch-ის ერორში იყოს problem reading configuration file
         throw Error("Could not find homework configuration file\n" + absolutePath)
     }
-    const preHwConfig = configFile;
+    const preHwConfig: HwConfigProp = configFile;
     checkGivenHwConfigProps(preHwConfig);
-    if (requireTestFile) {
+    if (preHwConfig.testFileName && requireTestFile) {
         checkTestFileValidity(path.dirname(absolutePath), preHwConfig.testFileName);
     }
     return convertGivenHwConfigToInterface(preHwConfig, absolutePath);

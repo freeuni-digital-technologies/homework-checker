@@ -9,6 +9,7 @@ import {fileNotFoundError, zipFormatError} from './modules/web'
 import {filesNotFoundError, teamNameNotFoundError} from "./modules/groupProject";
 import fs from "fs";
 import { downloadError} from "classroom-api";
+import {moduleGradesOnly} from "./modules/gradeOnly";
 
 
 export class HomeworkChecker {
@@ -19,17 +20,24 @@ export class HomeworkChecker {
     }
 
     async getSubmissionsWithResults(): Promise<Submission[]> {
+
+        const submissionsPromise = this.api.classroom.getSubmissions(this.hw.name)
+            .then(submissions => sliceSubmissions(submissions, this.run.opts.slice))
+            .then(submissions => filterSubmissions(submissions, this.run, this.hw))
+
+        if (this.module == moduleGradesOnly) {
+            return submissionsPromise
+        }
         const testPath = path.resolve(path.dirname(this.hw.configPath), this.hw.testFileName)
         if(!fs.existsSync(testPath)){
             throw new Error("Invalid Test Path")
         }
 
-        return await this.api.classroom.getSubmissions(this.hw.name)
-            .then(submissions => sliceSubmissions(submissions, this.run.opts.slice))
-            .then(submissions => filterSubmissions(submissions, this.run, this.hw))
+        return submissionsPromise
             .then(submissions => filterSubmissionsByAttachment(submissions))
             .then(logDownloadingSubmissions)
             .then(submissions => this.processSubmissions(submissions, testPath))
+
     }
 
     private async processSubmissions(submissions: Submission[], testPath: string): Promise<Submission[]> {

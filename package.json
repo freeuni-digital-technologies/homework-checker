@@ -9,6 +9,7 @@
     "watch-build": "tsc -w",
     "start": "cross-env NODE_ENV=production node --trace-uncaught lib/index.js",
     "notify": "cross-env NODE_ENV=production node lib/notifications.js",
+    "sum": "node lib/scripts/sumResults.js",
     "test": "ts-mocha test/**/*.test.ts",
     "daemon": "node lib/daemon.js",
     "integration-test": "ts-mocha integration-test/**/*.test.ts"
@@ -17,8 +18,6 @@
     "@fluffy-spoon/substitute": "^1.208.0",
     "@types/marked": "^4.0.3",
     "argparse": "^1.0.10",
-    "classroom-api": "^1.0.2",
-    "codehskarel-tester": "^1.0.0",
     "cron": "^1.8.2",
     "fs-extra": "^10.0.0",
     "marked": "^4.0.16",
@@ -26,8 +25,7 @@
     "node-html-parser": "^5.2.0",
     "shelljs": "^0.8.4",
     "ts-mockito": "^2.6.1",
-    "unzipper": "^0.10.11",
-    "website-tester": "^1.0.0"
+    "unzipper": "^0.10.11"
   },
   "devDependencies": {
     "@types/argparse": "^1.0.38",

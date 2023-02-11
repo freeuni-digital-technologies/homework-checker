@@ -93,6 +93,10 @@ function readCsv(manualResultsPath: string, resultsFile: string) {
 function addQuizCsvResults(results: any, studentNames: String[], manualResultsPath: string, resultsFile: string) {
     const quizId = resultsFile.split('quiz')[1].split('-')[0]
     const name = 'quiz' + quizId
+    addMoodleResults(name, results, studentNames, manualResultsPath, resultsFile)
+}
+
+function addMoodleResults(name: string, results: any, studentNames: String[], manualResultsPath: string, resultsFile: string) {
     // @ts-ignore
     studentNames.forEach(n => results[n][name] = 0)
     const studentNameOverrides: any = {}

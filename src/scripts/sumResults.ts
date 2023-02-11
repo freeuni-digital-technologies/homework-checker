@@ -33,6 +33,11 @@ export function summarizeResults(
         const sum: number = Object.values(studentResults).reduce((a: number, b: number) => a + b, 0)
         studentResults.sum = Number(sum.toFixed(2))
     })
+    // add bonuses here
+
+    addExamResults(results, studentNames, manualResultsPath)
+    // studentResults.final_score =
+
     const invalidList = invalidEntries.map(e => `${e.name},${e.emailId}`).join('\n')
     fs.writeFileSync(path.resolve(process.cwd(), '../../invalid.csv'), invalidList)
     return results;
@@ -53,6 +58,20 @@ function addManualResults(results: any, studentNames: String[], manualResultsPat
             } else {
                 addSimpleCsvResults(results, studentNames, manualResultsPath, f)
             }
+        })
+}
+
+function addExamResults(results: any, studentNames: String[], manualResultsPath: string) {
+    if (!fs.existsSync(manualResultsPath)) {
+        return
+    }
+    fs
+        .readdirSync(manualResultsPath)
+        .filter(f => f.includes('.csv'))
+        .filter(f => f.includes('final exam') || f.includes('final retake'))
+        .forEach(f => {
+            const name = f.includes('final exam') ? 'final exam' : 'final retake'
+            addMoodleResults(name, results, studentNames, manualResultsPath, f)
         })
 }
 

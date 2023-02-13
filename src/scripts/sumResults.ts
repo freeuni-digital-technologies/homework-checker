@@ -22,7 +22,7 @@ export function summarizeResults(
     homeworksPath: string = defaultPaths.hwConfig) {
     const studentNames = readStudentList(emisFileName)
     const results: any = {}
-    studentNames.forEach(s => results[s] = {total: 0, before_exam: 0})
+    studentNames.forEach(s => results[s] = {total: 0, before_exam: 0, total_bonus: 0})
     addHomeworkResults(results, studentNames, homeworksPath)
     try {
         addProjectResults(results)
@@ -117,6 +117,7 @@ function distributeBonusScores(results: any, studentNames: String[], manualResul
             return
         }
         let bonusSum: number = sumList(bonusHws.map(hwName => studentResults[hwName]))
+        studentResults.total_bonus = bonusSum
         if (bonusSum == 0) {
             // nothing to do
             return

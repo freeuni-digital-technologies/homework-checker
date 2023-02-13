@@ -6,11 +6,18 @@ import {summarizeResults} from "./sumResults";
 import {ProjectGroup} from "../modules/groupProject";
 import {
     ProjectResult,
-    logProjectResults,
     flattenProjectResults
 } from './sumProjectResults';
 import {defaultPaths} from "../config";
 
+
+const maxScore = 60
+const defaultScores = {
+    functionality: 5,
+    design: 5,
+    concept: 4,
+    report: 6,
+}
 
 function notifyResults(projectScoresPath = defaultPaths.project.scores,
                        projectsInfoPath = defaultPaths.project.info,
@@ -24,9 +31,9 @@ function notifyResults(projectScoresPath = defaultPaths.project.scores,
     const results = JSON.parse(fse.readFileSync(projectScoresPath, 'utf-8'))
         .map((e: any) => new ProjectResult(e))
     const pi = new ProjectsInfo(projectsInfoPath, projectFilesPath)
-    logProjectResults(results, pi)
-    const summaries = summarizeResults()
-    const emails = getEmails(results, pi, summaries)
+    const summariesWithoutBonus = summarizeResults(false)
+    const summariesWithBonus = summarizeResults(true)
+    const emails = getEmails(results, pi, summariesWithoutBonus, summariesWithBonus)
     const continueFromAddress = args.continue + '@freeuni.edu.ge'
     const continueFrom = args.continue ? emails.map(e => e.to).indexOf(continueFromAddress) : 0
     const emailsToSend = emails.slice(continueFrom, emails.length)
@@ -38,11 +45,11 @@ function notifyResults(projectScoresPath = defaultPaths.project.scores,
     }
 }
 
-function getEmails(results: ProjectResult[], pi: ProjectsInfo, summaries: any) {
+function getEmails(results: ProjectResult[], pi: ProjectsInfo, summariesWithoutBonus: any, summariesWithBonus: any) {
     return flattenProjectResults(results, pi)
        .map(r => {
            const { result, emailId } = r
-           const body = template(result, pi.findTeamWithId(result.groupId)!, summaries[emailId])
+           const body = template(result, pi.findTeamWithId(result.groupId)!, summariesWithoutBonus[emailId], summariesWithBonus[emailId])
            return {
                to: emailId + '@freeuni.edu.ge',
                subject: 'პროექტის და შუალედური შეფასება - შესავალი ციფრულ ტექნოლოგიებში',
@@ -51,52 +58,51 @@ function getEmails(results: ProjectResult[], pi: ProjectsInfo, summaries: any) {
        })
 }
 
-function template(result: ProjectResult, pj: ProjectGroup, summary: any) {
+function template(result: ProjectResult, pj: ProjectGroup, summariesWithoutBonus: any, summariesWithBonus: any) {
     return `
     <p>გამარჯობა,</p>
-    ${info}
     ${projectScore(result)}
     ${message(result)}
-    ${totalScore(summary)}
+    ${totalScore(summariesWithoutBonus, summariesWithBonus)}
     <p>წარმატებები,</p>
     <p>ია</p>
 `
 }
 
 
-function totalScore(scores: any) {
-    let message = `შენი შუალედური შეფასება პროექტთან ერთად არის ${Math.min(scores.sum, 70)}.`
-    if (scores.sum > 70) {
-         message = message + ` (ბონუსებით სულ დაგროვებული გაქვს გაქვს ${scores.sum}, მაქსიმალურ შეფასებაზე მეტი).`
-    }
-    return `
-    <p>${message}</p>
+function totalScore(scoresWithoutBonus: any, scoresWithBonus: any) {
+    const bonusPart = `<p>დამატებით, მიღებული გაქვს ${scoresWithBonus.total_bonus} ბონუს ქულა. 
+აქ შედის დისკუსიის და პროექტის ბონუსიც.</p>
+    <p>ეს ქულები გადანაწილდება საგნის დანარჩენ კომპონენტებზე და ემისზე შევა შემდეგნაირად:</p>
     <p>
-    ${Object.keys(scores)
-            .filter(s => s != 'sum')
-            .map(s => `${scores[s]} - ${s}`)
+    ${Object.keys(scoresWithBonus)
+        .filter(s => s.startsWith('hw') || s.startsWith('project') || s.startsWith('quiz'))
+        .map(s => `${s} - ${scoresWithBonus[s]}`)
+        .join('<br>')}
+    </p>
+    <p>${getBonusMessage(scoresWithBonus.before_exam + scoresWithBonus.total_bonus)}</p>`
+
+    return `
+    <p>დავალებებში, ქვიზებსა და პროექტში დააგროვე ${scoresWithBonus.before_exam} ქულა:</p>
+    <p>
+    ${Object.keys(scoresWithoutBonus)
+            .filter(s => s.startsWith('hw') || s.startsWith('project') || s.startsWith('quiz'))
+            .map(s => `${s} - ${scoresWithoutBonus[s]}`)
             .join('<br>')}
     </p>
-    <p>${getBonusMessage(scores.sum)}</p>
+    ${scoresWithBonus.total_bonus > 0 ? bonusPart : ''}
 `
 }
 
 function getBonusMessage(sum: number) {
-    const diff = sum - 70
+    const diff = sum - maxScore
     if (diff <= 0) {
         return ''
     }
-    const disclaimer = `როგორც რამდენჯერმე ვთქვი და ასევე დაკონკრეტებულია სილაბუსში, ბონუს ქულები არის
-    შუალედური შეფასების ნაწილი. ასევე არის ინფორმაცია საიტზე, სადაც ბონუს ქულებით სარგებლობა 
-    განსაზღვრულია მხოლოდ დავალების ან ქვიზის ქულების აღსადგენად. მაქსიმალური შუალედური შეფასება 
-    70 ქულაა, ამიტომ 70-ს ზემოთ ბონუს ქულები ვერ აისახება საბოლოო შეფასებაში (ფინალურ გამოცდას არ ემატება).
-    შენ მაქსიმალურზე მეტი ქულა გაქვს აღებული, მიხარია თუ საინტერესო იყო ეს საგანი და მადლობა მინდა გადაგიხადო
-     მონდომებისთვის და მოტივაციისთვის.
-    `
-    if (diff >= 5) {
-        return disclaimer + `ასევე, მინდა აღვნიშნო, რომ შენ განსაკუთრებით ბევრი ბონუსი გაქვს (მხოლოდ ორი სტუდენტი ხართ ასეთი).`
-    }
-   return disclaimer
+    return `ბონუს ქულები არის
+    შუალედური შეფასების ნაწილი და ემატება მხოლოდ დავალებებში, ქვიზში, ან პროექტში დაკლებულ ქულებს. მაქსიმალური შუალედური შეფასება 
+    ${maxScore} ქულაა, ამიტომ ${maxScore}-ს ზემოთ ბონუს ქულები ვერ აისახება საბოლოო შეფასებაში 
+    (ფინალურ გამოცდას არ ემატება).`
 }
 
 function projectScore(result: ProjectResult) {
@@ -110,21 +116,6 @@ function projectScore(result: ProjectResult) {
     `
 }
 
-const info = `
- <div>
-    <p>ქვემოთ იხილავ პროექტის შეფასებას და ჯამურ შუალედურ ქულას. ამ მეილებს ვგზავნი ეტაპობრივად, სხვებს მოგვიანებით 
-    მიუვათ.
-    <strong>აუცილებელია, </strong> რომ გადაამოწმო ყველა კომპონენტის შეფასება და დამიკავშირდე, თუ
-    რამე არასწორია. ძირითადად ასეთი შემთხვევები არის სტუდენტის მიერ ინსტრუქციის დარღვევის, მუდლის, იშვიათად
-    პროგრამის ან ბონუსის ჩანიშვნის დავიწყების. ასევე, რამდენიმე შემთხვევა იყო საპატიო მიზეზის გამო 
-    დაგვიანებით ჩათვლილი დავალების და შეიძლება ხელით შეყვანისას email id შემშლოდა. 
-    გამოგზავნამდე მაქსიმალურად ვამოწმებ ამ ყველაფერს და ინდივიდუალურადაც დავუკავშირდი ზოგ სტუდენტს დეტალების 
-    დასაზუსტებლად, მაგრამ მაინც მჭირდება დახმარება.
-    </p>
-    <p>ემისზე ქულებს (შუალედურ შეფასებას და გამოცდას) შევიყვან 1 ან 2 კვირაში.</p>
- </div>
-`
-
 function message(result: ProjectResult) {
     if (result.comment.trim().length == 0) {
         return ``
@@ -135,12 +126,6 @@ function message(result: ProjectResult) {
         `
 }
 
-const defaultScores = {
-    functionality: 7,
-    design: 7,
-    concept: 5,
-    report: 5,
-}
 
 if (require.main == module) {
     notifyResults()

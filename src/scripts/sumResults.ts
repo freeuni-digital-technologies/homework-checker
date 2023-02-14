@@ -265,7 +265,7 @@ function addHomeworkResults(results: any, studentNames: string[], homeworksPath:
                         results[r.emailId][hw.id] = config.defaultScore
                     } else if (r.status == 'failed') {
                         const score = r.classroomGrade || r.results.filter((t: Result) => t.passed).length / r.results.length * config.defaultScore
-                        results[r.emailId][hw.id] = Number(score.toFixed(2))
+                        results[r.emailId][hw.id] = Math.ceil(score)
                     } else {
                         results[r.emailId][hw.id] = 0
                     }

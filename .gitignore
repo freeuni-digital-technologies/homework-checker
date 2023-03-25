@@ -1,6 +1,6 @@
+.DS_Store
 node_modules/
 *.tsbuildinfo
-yarn.lock
 lib/
 output/
 yarn-error.log
@@ -8,3 +8,4 @@ yarn-error.log
 .idea/
 tmp/
 test/files/integrationTest/submissionFiles/*.fixed
+integration-test-data.zip

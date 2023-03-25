@@ -14,18 +14,28 @@
     "daemon": "node lib/daemon.js",
     "integration-test": "ts-mocha integration-test/**/*.test.ts"
   },
+  "files": [
+    "src",
+    "lib"
+  ],
   "dependencies": {
     "@fluffy-spoon/substitute": "^1.208.0",
+    "@types/fs-extra": "9.0.13",
     "@types/marked": "^4.0.3",
+    "@types/unzipper": "^0.10.5",
     "argparse": "^1.0.10",
+    "classroom-api": "^1.0.0",
+    "codehskarel-tester": "^1.0.2",
     "cron": "^1.8.2",
-    "fs-extra": "^10.0.0",
+    "dt-types": "^1.0.2",
+    "jskarel": "^1.0.1",
     "marked": "^4.0.16",
     "mock": "^0.1.1",
     "node-html-parser": "^5.2.0",
     "shelljs": "^0.8.4",
     "ts-mockito": "^2.6.1",
-    "unzipper": "^0.10.11"
+    "unzipper": "^0.10.11",
+    "website-tester": "^1.0.1"
   },
   "devDependencies": {
     "@types/argparse": "^1.0.38",

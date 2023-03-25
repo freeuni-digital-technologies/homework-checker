@@ -1,5 +1,5 @@
 {
-  "name": "main-module",
+  "name": "dt-homework-checker",
   "version": "1.0.0",
   "description": "main module for digital technologies subject",
   "main": "lib/index.js",

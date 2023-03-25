@@ -2,7 +2,7 @@ import * as unzipper from "unzipper";
 import * as path from "path";
 import * as fse from "fs-extra";
 
-const zipPath = path.resolve(__dirname,'../../integration-test-data.zip')
+const zipPath = path.resolve(__dirname,'../integration-test-data.zip')
 const unzipDir = path.resolve(__dirname, './integration-test-data')
 
 export const dataDir = path.join(unzipDir, 'data')

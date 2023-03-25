@@ -7,12 +7,14 @@ setupHooks()
 
 describe('sum Results', () => {
     it('22s',  () => {
-        const res = summarizeResults(
+        const res = summarizeResults(true,
             path.join(dataDir, 'emis.csv'),
-            path.join(dataDir, 'manualResults')
+            path.join(dataDir, 'manualResults'),
+	    path.join(dataDir, 'dt-homeworks'),
+	    dataDir
         )
         expect(Object.keys(res)).length(210)
-        expect(res['nabai21'].sum).eql(36)
-        expect(res['eanas21'].sum).eql(41)
+        expect(res['nabai21'].before_exam).eql(32)
+        expect(res['eanas21'].before_exam).eql(34)
     })
 })

@@ -19,11 +19,12 @@ export function summarizeResults(
     addBonusScores: boolean = false,
     emisFileName: string = defaultPaths.emis,
     manualResultsPath: string = defaultPaths.manualResults,
-    homeworksPath: string = defaultPaths.hwConfig) {
+    homeworksPath: string = defaultPaths.hwConfig,
+    dataDir?: string) {
     const studentNames = readStudentList(emisFileName)
     const results: any = {}
     studentNames.forEach(s => results[s] = {total: 0, before_exam: 0, total_bonus: 0})
-    addHomeworkResults(results, studentNames, homeworksPath)
+    addHomeworkResults(results, studentNames, homeworksPath, dataDir)
     try {
         addProjectResults(results)
     } catch {}
@@ -238,7 +239,7 @@ function addMoodleResults(name: string, results: any, studentNames: String[], ma
         })
 }
 
-function addHomeworkResults(results: any, studentNames: string[], homeworksPath: string) {
+function addHomeworkResults(results: any, studentNames: string[], homeworksPath: string, dataDir?: string) {
     fs
         .readdirSync(homeworksPath, {withFileTypes: true})
         .filter(f => f.isDirectory() && !f.name.startsWith('.') && !f.name.includes('group-project'))
@@ -247,6 +248,9 @@ function addHomeworkResults(results: any, studentNames: string[], homeworksPath:
         .map(hwName => {
             const hwPath = `${homeworksPath}/${hwName}/config.js`
             const hw = readHomeworkConfiguration(hwPath, false)
+            if (dataDir) {
+                hw.dataDir = dataDir
+            }
             studentNames.forEach(s => results[s][hw.id] = 0)
             const hwResults = mergeResults(hw, {})
             hwResults

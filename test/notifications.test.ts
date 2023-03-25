@@ -24,7 +24,9 @@ describe('selecting correct email template', () => {
     }
     const hw = dfs.defaultConfig()
     hw.emailTemplates = {
-        invalid: () => "invalidhwtemplate"
+        invalid: () => "invalidhwtemplate",
+        error: () => "errortemplate",
+        passed: () => "passed"
     }
     const emails = notify(results, 
         dfs.notifyAll, 

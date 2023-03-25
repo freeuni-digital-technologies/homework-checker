@@ -92,7 +92,7 @@ describe("homework checker Tests",() => {
             deadline: "undefined",
             module: "karel",
             subject: '_',
-            configPath: '../dt-homeworks/hw2/config.js',
+            configPath: __dirname + '/files/homeworkChecker/hw2tester.js',
             testFileName: "hw2tester.js"
         }
         const classroom = Substitute.for<Classroom>();

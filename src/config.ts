@@ -1,7 +1,7 @@
 import path from 'path'
 import fs from "fs"
 
-const dataDir = path.resolve(__dirname, '../../../data')
+const dataDir = path.resolve(__dirname, '../../data')
 const manualResults = path.join(dataDir, 'manualResults')
 const projectScores = path.join(manualResults, 'project_scores.json')
 const projectFiles = path.join(projectScores, 'files')
@@ -9,7 +9,7 @@ const projectFiles = path.join(projectScores, 'files')
 
 export const defaultPaths = {
     data: dataDir,
-    hwConfig: path.resolve(__dirname, '../../dt-homeworks'),
+    hwConfig: path.resolve(__dirname, '../dt-homeworks'),
     manualResults: manualResults,
     emis: path.join(dataDir, 'emis.csv'),
     project: {

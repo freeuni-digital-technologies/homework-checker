@@ -2,7 +2,7 @@ import { ArgumentParser } from 'argparse'
 import path from 'path'
 import { HwConfig, readHomeworkConfiguration, defaultHomeworkPath } from './homework'
 import { RunOpts } from './runs'
-
+import {defaultPaths} from "./config";
 
 export interface EnvOptions {
     hw: HwConfig,
@@ -40,7 +40,7 @@ export function getArgs(hwName?: string): EnvOptions {
             configPath = defaultHomeworkPath(hwId);
         }
     }
-    configPath = path.resolve(__dirname, configPath)
+    configPath = path.resolve(process.cwd(), configPath)
 
     const hwConfig = readHomeworkConfiguration(configPath);
 
@@ -52,7 +52,7 @@ export function getArgs(hwName?: string): EnvOptions {
     /* Data Folder Path */
     const dataPath: string = args['data_dir']
     if(!dataPath){
-        hwConfig.dataDir = path.resolve(__dirname, `../../../data`)
+        hwConfig.dataDir = defaultPaths.data
     }else{
         hwConfig.dataDir = path.resolve(process.cwd(), dataPath)
     }
